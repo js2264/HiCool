@@ -1,0 +1,20 @@
+Package: HiCompute
+Version: 0.99.0
+Date: 2022-11-04s
+Title: HiCompute
+Authors@R:
+    person("Jacques", "Serizay", email="jacquesserizay@gmail.com",
+        role=c("aut", "cre"))
+License: GPL-3
+Description: HiCompute: Process and normalize Hi-C raw data into (m)cool files.
+Imports:
+    basilisk,
+    reticulate
+Suggests:
+    testthat
+RoxygenNote: 7.2.1
+StagedInstall: no
+Encoding: UTF-8
+Depends: 
+    R (>= 2.10)
+LazyData: true
