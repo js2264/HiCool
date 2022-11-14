@@ -1,12 +1,12 @@
 #' @title Process Hi-C raw paired-end fastq files into a (m)cool processed data file.
-#' @rdname HiCompute
+#' @rdname HiCool
 #'
 #' @importFrom basilisk basiliskStart
 #' @importFrom basilisk basiliskStop
 #' @importFrom basilisk basiliskRun
 #' @export
 
-HiCompute <- function(
+HiCool <- function(
     r1, 
     r2, 
     genome, 
@@ -15,16 +15,16 @@ HiCompute <- function(
     iterative = TRUE, 
     filter = TRUE, 
     threads = 16L, 
-    output_folder = 'HiCompute/', 
-    exclude_chr = 'Mito|chrM|MT'  
+    output_folder = 'HiCool', 
+    exclude_chr = 'Mito|chrM|MT', 
+    scratch = 'tmp'  
 )
 {
-    proc <- basilisk::basiliskStart(env_HiCompute)
+    proc <- basilisk::basiliskStart(env_HiCool)
     on.exit(basilisk::basiliskStop(proc))
-    tmp_folder <- paste0('/tmp/Rtmp', paste0(sample(c(letters, 0:9), 6, replace = TRUE), collapse = ''), '/')
-    basilisk::basiliskRun(
-        env = env_HiCompute, 
-        fun = .HiCompute,
+    hash <- basilisk::basiliskRun(
+        env = env_HiCool, 
+        fun = .HiCool,
         r1 = .fix_HOME(r1), 
         r2 = .fix_HOME(r2), 
         genome = .fix_HOME(genome), 
@@ -35,15 +35,25 @@ HiCompute <- function(
         threads = threads, 
         output_folder = .fix_HOME(output_folder), 
         exclude_chr = exclude_chr, 
-        tmp_folder = tmp_folder  
+        scratch = scratch  
     )
-    return(TRUE)
+    files <- list.files(output_folder, pattern = hash, full.names = TRUE, recursive = TRUE)
+    log_file <- grep('log', files, value = TRUE)
+    res <- HiCExperiment::HiCoolFile(
+        mcool = grep('mcool', files, value = TRUE), 
+        resolution = as.integer(gsub(',.*', '', resolutions)),
+        pairs = grep('pairs', files, value = TRUE), 
+        log = list(
+
+        )
+    )
+    return(res)
 }
 
 #' @importFrom reticulate import
 #' 
 
-.HiCompute <- function(
+.HiCool <- function(
     r1, 
     r2, 
     genome, 
@@ -54,7 +64,7 @@ HiCompute <- function(
     threads, 
     output_folder, 
     exclude_chr, 
-    tmp_folder  
+    scratch  
 ) {
 
     ## -------- Import python libraries
@@ -63,16 +73,25 @@ HiCompute <- function(
 
     ## -------- Define variables
     hash <- paste0(sample(c(LETTERS, 0:9), 6, replace = TRUE), collapse = '')
-    prefix <- paste0(gsub('_[rR].*', '', basename(r1)), '^', hash)
+    tmp_folder <- file.path(scratch, hash)
+    prefix <- paste0(
+        gsub('_[rR].*', '', basename(r1)), 
+        '^', basename(genome), 
+        '^', hash
+    )
     first_res <- as.integer(gsub(',.*', '', resolutions))
-    frags <- paste0(tmp_folder, prefix, '.frags.tsv')
-    chroms <- paste0(tmp_folder, prefix, '.chr.tsv')
-    filtered_chroms <- paste0(tmp_folder, prefix, '.chr_filtered.tsv')
-    contact_map <- paste0(tmp_folder, prefix, '.cool')
-    out_prefix <- paste0(tmp_folder, prefix, '_', first_res)
-    contact_map_rebinned <- paste0(out_prefix, '.cool')
-    contact_map_filtered <- paste0(out_prefix, '_filtered.cool')
-    mcool <- paste0(out_prefix, '.mcool')
+    frags <- file.path(tmp_folder, paste0(prefix, '.frags.tsv'))
+    chroms <- file.path(tmp_folder, paste0(prefix, '.chr.tsv'))
+    filtered_chroms <- file.path(tmp_folder, paste0(prefix, '.chr_filtered.tsv'))
+    contact_map <- file.path(tmp_folder, paste0(prefix, '.cool'))
+    rebinned_prefix <- file.path(tmp_folder, paste0(prefix, '_', first_res))
+    contact_map_rebinned <- file.path(tmp_folder, paste0(prefix, '_', first_res, '.cool'))
+    contact_map_filtered <- file.path(tmp_folder, paste0(prefix, '_', first_res, '_filtered.cool'))
+    contact_map_mcool <- file.path(tmp_folder, paste0(prefix, '_', first_res, '.mcool'))
+    sinked_log <- file.path(tmp_folder, paste0(prefix, '.Rlog'))
+
+    ## -------- Save R console output to sinked_log
+    dir.create(tmp_folder, showWarnings = FALSE, recursive = TRUE)
 
     ## -------- Map reads with hicstuff
     hs$pipeline$full_pipeline(
@@ -92,7 +111,7 @@ HiCompute <- function(
         prefix = prefix, 
         threads = threads,
         distance_law = TRUE
-    )
+    ) |> reticulate::py_capture_output() |> write(sinked_log)
 
     ## -------- Rebin with hicstuff rebin 
     hs$commands$Rebin(
@@ -101,10 +120,10 @@ HiCompute <- function(
             " --frags ", frags, 
             " --chroms ", chroms,
             " --force ", 
-            contact_map, ' ', out_prefix 
+            contact_map, ' ', rebinned_prefix 
         ),
         global_args = ""
-    )$execute()
+    )$execute() |> reticulate::py_capture_output() |> write(sinked_log, append = TRUE)
     
     ## -------- Exclude unwanted chr. from cool file
     chr <- readLines(file.path(tmp_folder, paste0(prefix, '.chr.tsv'))) 
@@ -128,7 +147,7 @@ HiCompute <- function(
         one_based_starts = FALSE, 
         chunksize = NULL, 
         out = paste0(contact_map_filtered, '_tmp')
-    )
+    ) |> reticulate::py_capture_output() |> write(sinked_log, append = TRUE)
     cooler$cli$load$load$callback(
         bins_path = paste0(
             filtered_chroms, ":", first_res
@@ -146,52 +165,67 @@ HiCompute <- function(
         input_copy_status = NULL, 
         no_symmetric_upper = FALSE, 
         storage_options = NULL
-    )
+    ) |> reticulate::py_capture_output() |> write(sinked_log, append = TRUE)
 
     ## -------- Generate a multi-resolution mcool file
     cooler$zoomify_cooler(
         base_uris = contact_map_filtered, 
-        outfile = mcool, 
+        outfile = contact_map_mcool, 
         resolutions = strsplit(resolutions, ',')[[1]] |> as.integer(), 
         chunksize = 10000000L, 
         nproc = threads, 
         columns = NULL, 
         dtypes = NULL, 
         agg = NULL
-    )
+    ) |> reticulate::py_capture_output() |> write(sinked_log, append = TRUE)
     cooler$cli$zoomify$invoke_balance(
-        args = "--cis-only --min-nnz 3 --mad-max 7", 
+        args = paste0("--nproc ", threads, " --cis-only --min-nnz 3 --mad-max 7"), 
         resolutions = strsplit(resolutions, ',')[[1]] |> as.integer(), 
-        outfile = mcool  
-    )
-
-    ## -------- Save commands to R script 
-    dir.create(file.path(output_folder, 'logs'), showWarnings = FALSE, recursive = TRUE)
+        outfile = contact_map_mcool  
+    ) |> reticulate::py_capture_output() |> write(sinked_log, append = TRUE)
 
     ## -------- Tidy-up everything
     # Mcool
-    dir.create(file.path(output_folder, 'cool', basename(genome)), showWarnings = FALSE, recursive = TRUE)
+    dir.create(file.path(output_folder, 'cool'), showWarnings = FALSE, recursive = TRUE)
     file.copy(
-        mcool, 
-        file.path(output_folder, 'cool', basename(genome), paste0(prefix, '.mcool'))
+        contact_map_mcool, 
+        file.path(output_folder, 'cool', paste0(prefix, '.mcool'))
     )
 
     # Bam
-    dir.create(file.path(output_folder, 'bam', basename(genome)), showWarnings = FALSE, recursive = TRUE)
+    dir.create(file.path(output_folder, 'bam'), showWarnings = FALSE, recursive = TRUE)
     file.copy(
         file.path(tmp_folder, 'tmp', paste0(prefix, '.for.bam')), 
-        file.path(output_folder, 'bam', basename(genome), paste0(prefix, '.fwd', '.bam'))
+        file.path(output_folder, 'bam', paste0(prefix, '.fwd.bam'))
     )
     file.copy(
         file.path(tmp_folder, 'tmp', paste0(prefix, '.rev.bam')), 
-        file.path(output_folder, 'bam', basename(genome), paste0(prefix, '.rev', '.bam'))
+        file.path(output_folder, 'bam', paste0(prefix, '.rev.bam'))
     )
 
     # Pairs
-    dir.create(file.path(output_folder, 'pairs', basename(genome)), showWarnings = FALSE, recursive = TRUE)
+    dir.create(file.path(output_folder, 'pairs'), showWarnings = FALSE, recursive = TRUE)
     file.copy(
         list.files(tmp_folder, pattern = paste0(hash, '.valid_idx_pcrfree.pairs'), recursive = TRUE, full.names = TRUE), 
-        file.path(output_folder, 'pairs', basename(genome), paste0(prefix, '.rev', '.bam'))
+        file.path(output_folder, 'pairs', paste0(prefix, '.pairs'))
+    )
+
+    # Pairs
+    dir.create(file.path(output_folder, 'pairs'), showWarnings = FALSE, recursive = TRUE)
+    file.copy(
+        list.files(tmp_folder, pattern = paste0(hash, '.valid_idx_pcrfree.pairs'), recursive = TRUE, full.names = TRUE), 
+        file.path(output_folder, 'pairs', paste0(prefix, '.pairs'))
+    )
+
+    # Plots
+    dir.create(file.path(output_folder, 'plots'), showWarnings = FALSE, recursive = TRUE)
+    file.copy(
+        list.files(tmp_folder, pattern = paste0(hash, '_event_distance.pdf'), recursive = TRUE, full.names = TRUE), 
+        file.path(output_folder, 'plots', paste0(prefix, '_event_distance.pdf'))
+    )
+    file.copy(
+        list.files(tmp_folder, pattern = paste0(hash, '_event_distribution.pdf'), recursive = TRUE, full.names = TRUE), 
+        file.path(output_folder, 'plots', paste0(prefix, '_event_distribution.pdf'))
     )
 
     # Log
@@ -201,5 +235,5 @@ HiCompute <- function(
         file.path(output_folder, 'logs', paste0(prefix, '.log'))
     )
 
-    return(TRUE)
+    return(hash)
 }
