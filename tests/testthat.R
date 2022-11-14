@@ -1,3 +1,3 @@
 library(testthat)
-library(HiCompute)
-test_check("HiCompute")
+library(HiCool)
+test_check("HiCool")
