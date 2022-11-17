@@ -2,7 +2,7 @@
 % Please edit documentation in R/compute.R
 \name{HiCool}
 \alias{HiCool}
-\title{Process Hi-C raw paired-end fastq files into a (m)cool processed data file.}
+\title{Processing Hi-C paired-end fastq files in R}
 \usage{
 HiCool(
   r1,
@@ -15,9 +15,66 @@ HiCool(
   threads = 16L,
   output_folder = "HiCool",
   exclude_chr = "Mito|chrM|MT",
-  scratch = "tmp"
+  scratch = tempdir()
 )
 }
+\arguments{
+\item{r1}{Path to fastq file (R1 read)}
+
+\item{r2}{Path to fastq file (R2 read)}
+
+\item{genome}{Genome used to map the reads on, provided either
+as a fasta file (in which case the bowtie2 index will be automatically
+generated), or as a prefix to a bowtie2 index (e.g. \code{mm10} for
+\code{mm10.*.bt2} files)}
+
+\item{resolutions}{Resolutions used to bin the final mcool file
+(Default: "1000,2000,4000,8000,16000")}
+
+\item{restriction}{Restriction enzyme(s) used in HiC (Default: "DpnII,HinfI")}
+
+\item{iterative}{Should the read mapping be performed iteratively?
+(Default: TRUE)}
+
+\item{filter}{Should read pairs be filtered (using filtering approach
+described in Cournac et al., BMC Genomics 2012)? (Default: TRUE)}
+
+\item{threads}{Number of CPUs used for parallelization. (Default: 16)}
+
+\item{output_folder}{Path to output directory where processed files will
+be created. (Default: \code{./HiCool})}
+
+\item{exclude_chr}{Chromosomes excluded from the final .mcool file. This will
+not affect the pairs file. (Default: "Mito|chrM|MT")}
+
+\item{scratch}{Path to temporary directory where processing will take place.
+(Default: \code{tempdir()})}
+}
 \description{
-Process Hi-C raw paired-end fastq files into a (m)cool processed data file.
+\code{HiCool::HiCool()} automatically processes paired-end HiC sequencing files
+by performing the following steps:
+\enumerate{
+\item Automatically setting up an appropriate conda environment using basilisk;
+\item Mapping the reads to the provided genome reference using hicstuff;
+\item Binning the mapped fragments into a cool file at a chosen resolution;
+\item Filtering the resulting cool file to remove unwanted chromosomes (e.g. chrM);
+\item Generating a multi-resolution mcool file;
+\item Normalizing matrices at each resolution by iterative corretion using cooler.
+}
+}
+\examples{
+## -------- Get fasta file from AnnotationHub
+ah <- AnnotationHub::AnnotationHub()
+twobit <- ah[['AH106801']]
+on.exit(unlink('seq.fa'))
+BiocIO::export(BiocIO::import(twobit), con = 'seq.fa', format = 'fasta')
+
+## -------- Get fastq files from HiContactsData
+#r1 <- HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'r1_fastq')
+#r2 <- HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'r2_fastq')
+
+## -------- Run HiCool::HiCool()
+on.exit(unlink('./HiCool/'), add = TRUE)
+#hcf <- HiCool(r1, r2, 'seq.fa', output_folder = './HiCool/')
+#hcf
 }

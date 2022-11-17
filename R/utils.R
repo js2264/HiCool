@@ -1,3 +1,3 @@
-.fix_HOME <- function(x) {
+.fixHOME <- function(x) {
     gsub('~', Sys.getenv('HOME'), x)
 }
