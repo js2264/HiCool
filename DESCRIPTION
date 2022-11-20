@@ -5,18 +5,35 @@ Title: HiCool
 Authors@R:
     person("Jacques", "Serizay", email="jacquesserizay@gmail.com",
         role=c("aut", "cre"))
-License: GPL-3
-Description: HiCool: Process and normalize Hi-C raw data into (m)cool files.
+Description: HiCool provides an R interface to process and normalize Hi-C 
+    paired-end fastq reads into .(m)cool files. 
+    .(m)cool is a compact, indexed HDF5 file format specifically tailored for 
+    efficiently storing HiC-based data. 
+    On top of processing fastq reads, HiCool provies a convenient reporting 
+    function to generate shareable reports summarizing Hi-C experiments and 
+    including quality controls. 
+License: MIT + file LICENSE
+URL: https://github.com/js2264/HiCool
+BugReports: https://github.com/js2264/HiCool/issues
 Depends:
     R (>= 4.2),
     HiCExperiment,
+    HiContacts,
     BiocIO,
     S4Vectors
 Imports:
     basilisk,
-    reticulate
+    reticulate,
+    usethis,
+    rmarkdown,
+    rmdformats,
+    plotly,
+    stringr,
+    sessioninfo
 Suggests:
-    testthat
+    AnnotationHub, 
+    testthat,
+    knitr
 biocViews:
     HiC,
     DNA3DStructure, 

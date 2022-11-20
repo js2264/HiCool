@@ -30,8 +30,10 @@
 #' @param threads Number of CPUs used for parallelization. (Default: 16)
 #' @param exclude_chr Chromosomes excluded from the final .mcool file. This will 
 #'   not affect the pairs file. (Default: "Mito|chrM|MT")
-#' @param output_folder Path to output directory where processed files will 
+#' @param output Path to output directory where processed files will 
 #'   be created. (Default: `./HiCool`)
+#' @param keep_bam Should the bam files be kept? (Default: FALSE)
+#' @param build_report Should an automated report be computed? (Default: FALSE)
 #' @param scratch Path to temporary directory where processing will take place. 
 #'   (Default: `tempdir()`)
 #' 
@@ -57,12 +59,12 @@
 #' 
 #' ## -------- Run HiCool::HiCool()
 #' on.exit(unlink('./HiCool/'), add = TRUE)
-#' #hcf <- HiCool(r1, r2, 'seq.fa', output_folder = './HiCool/')
+#' #hcf <- HiCool(r1, r2, 'seq.fa', output = './HiCool/')
 #' #hcf
 
-#r1 = '/home/rsg/repos/tinyMapper/tests/testHiC_R1.fq.gz'
-#r2 = '/home/rsg/repos/tinyMapper/tests/testHiC_R2.fq.gz'
-#hcf <- HiCool(r1, r2, 'seq.fa', output_folder = './HiCool/')
+#r1 = '/home/rsg/repos/HiContactsData/data/HiC_wt_yeast.R1.fq.gz'
+#r2 = '/home/rsg/repos/HiContactsData/data/HiC_wt_yeast.R2.fq.gz'
+#hcf <- HiCool(r1, r2, 'seq.fa', output = './HiCool/')
 
 HiCool <- function(
     r1, 
@@ -72,16 +74,19 @@ HiCool <- function(
     restriction = 'DpnII,HinfI', 
     iterative = TRUE, 
     filter = TRUE, 
-    threads = 16L, 
-    output_folder = 'HiCool', 
+    threads = 1L, 
+    output = 'HiCool', 
     exclude_chr = 'Mito|chrM|MT', 
+    keep_bam = FALSE, 
+    build_report = FALSE, 
     scratch = tempdir()  
 )
 {
     r1 <- .fixHOME(r1)
     r2 <- .fixHOME(r2)
     genome <- .fixHOME(genome)
-    output_folder <- .fixHOME(output_folder)
+    output <- .fixHOME(output)
+    .checkGenome(genome)
 
     proc <- basilisk::basiliskStart(env_HiCool)
     on.exit(basilisk::basiliskStop(proc))
@@ -96,12 +101,41 @@ HiCool <- function(
         restriction = restriction, 
         iterative = iterative, 
         filter = filter, 
-        threads = threads, 
-        output_folder = output_folder, 
+        threads = as.integer(threads), 
+        output = output, 
         exclude_chr = exclude_chr, 
+        keep_bam = keep_bam, 
         scratch = scratch  
     )
-    hcf <- .importHiCoolFolder(output_folder, hash, resolutions)
+    hcf <- importHiCoolFolder(output, hash)
+    metadata(hcf)$stats <- .getHicStats(gsub('.log$', '.stats', metadata(hcf)$log), filtered = filter, iterative = iterative)
+    metadata(hcf)$args <- list(
+        r1 = r1,
+        r2 = r2,
+        genome = genome,
+        resolutions = resolutions,
+        restriction = restriction,
+        iterative = iterative,
+        filter = filter,
+        threads = threads,
+        output = output,
+        exclude_chr = exclude_chr,
+        keep_bam = keep_bam,
+        scratch = scratch
+    )
+    message("HiCool :: .fastq to .mcool processing done!")
+    message("HiCool :: Check ", output, "folder to find the generated files")
+
+    ## -- Create HiCool report 
+    if (build_report) {
+        message("HiCool :: Creating HiCool report...")
+        HiCReport(hcf)
+        message("HiCool :: All processing successfully achieved. Congrats!")
+    }
+    else {
+        message("HiCool :: Run `HiCool::HiCReport(x)` to generate a report for this CoolFile.")
+    }
+
     return(hcf)
 }
 
@@ -114,8 +148,9 @@ HiCool <- function(
     iterative, 
     filter, 
     threads, 
-    output_folder, 
+    output, 
     exclude_chr, 
+    keep_bam, 
     scratch  
 ) {
 
@@ -126,8 +161,9 @@ HiCool <- function(
     ## -------- Define variables
     hash <- paste0(sample(c(LETTERS, 0:9), 6, replace = TRUE), collapse = '')
     tmp_folder <- file.path(scratch, hash)
+    message("HiCool :: Initiating processing of fastq files [tmp folder: ", tmp_folder, "]...")
     prefix <- paste0(
-        gsub('_[rR].*', '', basename(r1)), 
+        gsub('[._][rR][12].*', '', basename(r1)), 
         '^mapped-', gsub('.fa$', '', basename(genome)), 
         '^', hash
     )
@@ -146,6 +182,7 @@ HiCool <- function(
     dir.create(tmp_folder, showWarnings = FALSE, recursive = TRUE)
     
     ## -------- Map reads with hicstuff
+    message("HiCool :: Mapping fastq files...")
     hs$pipeline$full_pipeline(
         input1 = r1, 
         input2 = r2, 
@@ -166,8 +203,10 @@ HiCool <- function(
     ) |> reticulate::py_capture_output() |> write(sinked_log)
     log_file <- list.files(tmp_folder, pattern = paste0(hash, '.hicstuff_'), full.names = TRUE)
     log <- readLines(log_file)
+    log[length(log)+1] <- paste0('#### ::: WD ::: ', getwd()) 
 
     ## -------- Rebin with hicstuff rebin 
+    message("HiCool :: Binning chimeric fragments...")
     hs$commands$Rebin(
         command_args = paste0(
             " --binning ", paste0(first_res/1000, 'kb'), 
@@ -180,6 +219,7 @@ HiCool <- function(
     )$execute() |> reticulate::py_capture_output() |> write(sinked_log, append = TRUE)
     
     ## -------- Exclude unwanted chr. from cool file
+    message("HiCool :: Remove unwanted chromosomes...")
     chr <- readLines(file.path(tmp_folder, paste0(prefix, '.chr.tsv'))) 
     chr <- grep(exclude_chr, chr, invert = TRUE, value = TRUE)
     chr <- grep('contig', chr, invert = TRUE, value = TRUE)
@@ -222,6 +262,7 @@ HiCool <- function(
     ) |> reticulate::py_capture_output() |> write(sinked_log, append = TRUE)
 
     ## -------- Generate a multi-resolution mcool file
+    message("HiCool :: Generating multi-resolution .mcool file...")
     cooler$zoomify_cooler(
         base_uris = contact_map_filtered, 
         outfile = contact_map_mcool, 
@@ -232,6 +273,7 @@ HiCool <- function(
         dtypes = NULL, 
         agg = NULL
     ) |> reticulate::py_capture_output() |> write(sinked_log, append = TRUE)
+    message("HiCool :: Balancing .mcool file...")
     cooler$cli$zoomify$invoke_balance(
         args = paste0("--nproc ", threads, " --cis-only --min-nnz 3 --mad-max 7"), 
         resolutions = strsplit(resolutions, ',')[[1]] |> as.integer(), 
@@ -239,64 +281,55 @@ HiCool <- function(
     ) |> reticulate::py_capture_output() |> write(sinked_log, append = TRUE)
 
     ## -------- Tidy-up everything
+    message("HiCool :: Tidying up everything for you :)...")
     # Matrices
-    dir.create(file.path(output_folder, 'matrices'), showWarnings = FALSE, recursive = TRUE)
+    dir.create(file.path(output, 'matrices'), showWarnings = FALSE, recursive = TRUE)
     file.copy(
         contact_map_mcool, 
-        file.path(output_folder, 'matrices', paste0(prefix, '.mcool'))
+        file.path(output, 'matrices', paste0(prefix, '.mcool'))
     )
 
     # Bam
-    dir.create(file.path(output_folder, 'bam'), showWarnings = FALSE, recursive = TRUE)
-    file.copy(
-        file.path(tmp_folder, 'tmp', paste0(prefix, '.for.bam')), 
-        file.path(output_folder, 'bam', paste0(prefix, '.fwd.bam'))
-    )
-    file.copy(
-        file.path(tmp_folder, 'tmp', paste0(prefix, '.rev.bam')), 
-        file.path(output_folder, 'bam', paste0(prefix, '.rev.bam'))
-    )
+    if (keep_bam) {
+        dir.create(file.path(output, 'bam'), showWarnings = FALSE, recursive = TRUE)
+        file.copy(
+            file.path(tmp_folder, 'tmp', paste0(prefix, '.for.bam')), 
+            file.path(output, 'bam', paste0(prefix, '.fwd.bam'))
+        )
+        file.copy(
+            file.path(tmp_folder, 'tmp', paste0(prefix, '.rev.bam')), 
+            file.path(output, 'bam', paste0(prefix, '.rev.bam'))
+        )
+    }
 
     # Pairs
-    dir.create(file.path(output_folder, 'pairs'), showWarnings = FALSE, recursive = TRUE)
+    dir.create(file.path(output, 'pairs'), showWarnings = FALSE, recursive = TRUE)
     file.copy(
         list.files(tmp_folder, pattern = paste0(hash, '.valid_idx_pcrfree.pairs'), recursive = TRUE, full.names = TRUE), 
-        file.path(output_folder, 'pairs', paste0(prefix, '.pairs'))
+        file.path(output, 'pairs', paste0(prefix, '.pairs'))
     )
 
     # Plots
-    dir.create(file.path(output_folder, 'plots'), showWarnings = FALSE, recursive = TRUE)
+    dir.create(file.path(output, 'plots'), showWarnings = FALSE, recursive = TRUE)
     file.copy(
         list.files(tmp_folder, pattern = paste0(hash, '_event_distance.pdf'), recursive = TRUE, full.names = TRUE), 
-        file.path(output_folder, 'plots', paste0(prefix, '_event_distance.pdf'))
+        file.path(output, 'plots', paste0(prefix, '_event_distance.pdf'))
     )
     file.copy(
         list.files(tmp_folder, pattern = paste0(hash, '_event_distribution.pdf'), recursive = TRUE, full.names = TRUE), 
-        file.path(output_folder, 'plots', paste0(prefix, '_event_distribution.pdf'))
+        file.path(output, 'plots', paste0(prefix, '_event_distribution.pdf'))
     )
 
     # Log
-    dir.create(file.path(output_folder, 'logs'), showWarnings = FALSE, recursive = TRUE)
+    dir.create(file.path(output, 'logs'), showWarnings = FALSE, recursive = TRUE)
     file.copy(
         log_file, 
-        file.path(output_folder, 'logs', paste0(prefix, '.log'))
+        file.path(output, 'logs', paste0(prefix, '.log'))
     )
     writeLines(
         log,
-        file.path(output_folder, 'logs', paste0(prefix, '.stats'))
+        file.path(output, 'logs', paste0(prefix, '.stats'))
     )
     return(hash)
 }
 
-.importHiCoolFolder <- function(output_folder, hash, resolutions) {
-    files <- list.files(output_folder, pattern = hash, full.names = TRUE, recursive = TRUE)
-    HiCExperiment::CoolFile(
-        path = grep('mcool', files, value = TRUE), 
-        resolution = as.integer(gsub(',.*', '', resolutions)),
-        pairs = grep('pairs', files, value = TRUE), 
-        metadata = list(
-            log = grep('\\.log', files, value = TRUE),
-            stats = grep('\\.stats', files, value = TRUE)
-        )
-    )
-}
