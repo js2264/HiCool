@@ -70,7 +70,7 @@ HiCool <- function(
     r1, 
     r2, 
     genome, 
-    resolutions = '1000,2000,4000,8000,16000', 
+    resolutions = NULL, 
     restriction = 'DpnII,HinfI', 
     iterative = TRUE, 
     filter = TRUE, 
@@ -167,15 +167,14 @@ HiCool <- function(
         '^mapped-', gsub('.fa$', '', basename(genome)), 
         '^', hash
     )
-    first_res <- as.integer(gsub(',.*', '', resolutions))
     frags <- file.path(tmp_folder, paste0(prefix, '.frags.tsv'))
     chroms <- file.path(tmp_folder, paste0(prefix, '.chr.tsv'))
     filtered_chroms <- file.path(tmp_folder, paste0(prefix, '.chr_filtered.tsv'))
     contact_map <- file.path(tmp_folder, paste0(prefix, '.cool'))
-    rebinned_prefix <- file.path(tmp_folder, paste0(prefix, '_', first_res))
-    contact_map_rebinned <- file.path(tmp_folder, paste0(prefix, '_', first_res, '.cool'))
-    contact_map_filtered <- file.path(tmp_folder, paste0(prefix, '_', first_res, '_filtered.cool'))
-    contact_map_mcool <- file.path(tmp_folder, paste0(prefix, '_', first_res, '.mcool'))
+    rebinned_prefix <- file.path(tmp_folder, paste0(prefix, '_res0'))
+    contact_map_rebinned <- file.path(tmp_folder, paste0(prefix, '_res0.cool'))
+    contact_map_filtered <- file.path(tmp_folder, paste0(prefix, '_res0_filtered.cool'))
+    contact_map_mcool <- file.path(tmp_folder, paste0(prefix, '_res0.mcool'))
     sinked_log <- file.path(tmp_folder, paste0(prefix, '.Rlog'))
 
     ## -------- Save R console output to sinked_log
@@ -205,6 +204,30 @@ HiCool <- function(
     log <- readLines(log_file)
     log[length(log)+1] <- paste0('#### ::: WD ::: ', getwd()) 
 
+    ## -------- Automatically deduce appropriate resolutions if unspecified
+    chrs <- read.delim(file.path(tmp_folder, paste0(prefix, '.chr.tsv')), sep = '\t') 
+    if (is.null(resolutions)) { 
+        tot_length <- sum(chrs$length)
+        resolutions_idx <- dplyr::case_when(
+            tot_length < 16000 ~ 1,
+            tot_length >= 16000 & tot_length < 100000000 ~ 2,
+            tot_length >= 100000000 & tot_length < 1000000000 ~ 3,
+            tot_length >= 1000000000 ~ 4
+        )
+        list_resolutions <- list(
+            c(100, 200, 400, 800, 1600),
+            c(1000, 2000, 4000, 8000, 16000),
+            c(4000, 8000, 16000, 32000, 64000, 128000, 256000, 512000),
+            c(10000, 20000, 40000, 80000, 160000, 320000, 640000, 1280000, 2560000)
+        )
+        first_res <- list_resolutions[[resolutions_idx]][1]
+        message("HiCool :: Best-suited resolution automatically inferred: ", first_res)
+        resolutions <- paste(list_resolutions[[resolutions_idx]], collapse = ',')
+    }
+    else {
+        first_res <- as.integer(gsub(',.*', '', resolutions))
+    }
+
     ## -------- Rebin with hicstuff rebin 
     message("HiCool :: Binning chimeric fragments...")
     hs$commands$Rebin(
@@ -219,47 +242,53 @@ HiCool <- function(
     )$execute() |> reticulate::py_capture_output() |> write(sinked_log, append = TRUE)
     
     ## -------- Exclude unwanted chr. from cool file
-    message("HiCool :: Remove unwanted chromosomes...")
-    chr <- readLines(file.path(tmp_folder, paste0(prefix, '.chr.tsv'))) 
-    chr <- grep(exclude_chr, chr, invert = TRUE, value = TRUE)
-    chr <- grep('contig', chr, invert = TRUE, value = TRUE)
-    writeLines(chr, filtered_chroms)
-    cooler$cli$dump$dump$callback(
-        contact_map_rebinned, 
-        table = "pixels", 
-        columns = NULL, 
-        header = FALSE, 
-        na_rep = "", 
-        float_format = 'g', 
-        range = NULL, 
-        range2 = NULL, 
-        matrix = FALSE, 
-        balanced = FALSE, 
-        join = TRUE, 
-        annotate = NULL, 
-        one_based_ids = FALSE, 
-        one_based_starts = FALSE, 
-        chunksize = NULL, 
-        out = paste0(contact_map_filtered, '_tmp')
-    ) |> reticulate::py_capture_output() |> write(sinked_log, append = TRUE)
-    cooler$cli$load$load$callback(
-        bins_path = paste0(
-            filtered_chroms, ":", first_res
-        ), 
-        pixels_path = paste0(contact_map_filtered, '_tmp'), 
-        cool_path = contact_map_filtered, 
-        format = 'bg2', 
-        metadata = NULL, 
-        assembly = NULL, 
-        chunksize = 20e6L, 
-        field = "", 
-        count_as_float = FALSE, 
-        one_based = FALSE, 
-        comment_char = "#", 
-        input_copy_status = NULL, 
-        no_symmetric_upper = FALSE, 
-        storage_options = NULL
-    ) |> reticulate::py_capture_output() |> write(sinked_log, append = TRUE)
+    excludable_chrs <- grep(exclude_chr, chrs$contig, value = TRUE)
+    if (length(excludable_chrs)) {
+        message("HiCool :: Remove unwanted chromosomes...")
+        chr <- readLines(file.path(tmp_folder, paste0(prefix, '.chr.tsv'))) 
+        chr <- grep(exclude_chr, chr, invert = TRUE, value = TRUE)
+        chr <- grep('contig', chr, invert = TRUE, value = TRUE)
+        writeLines(chr, filtered_chroms)
+        cooler$cli$dump$dump$callback(
+            contact_map_rebinned, 
+            table = "pixels", 
+            columns = NULL, 
+            header = FALSE, 
+            na_rep = "", 
+            float_format = 'g', 
+            range = NULL, 
+            range2 = NULL, 
+            matrix = FALSE, 
+            balanced = FALSE, 
+            join = TRUE, 
+            annotate = NULL, 
+            one_based_ids = FALSE, 
+            one_based_starts = FALSE, 
+            chunksize = NULL, 
+            out = paste0(contact_map_filtered, '_tmp')
+        ) |> reticulate::py_capture_output() |> write(sinked_log, append = TRUE)
+        cooler$cli$load$load$callback(
+            bins_path = paste0(
+                filtered_chroms, ":", first_res
+            ), 
+            pixels_path = paste0(contact_map_filtered, '_tmp'), 
+            cool_path = contact_map_filtered, 
+            format = 'bg2', 
+            metadata = NULL, 
+            assembly = NULL, 
+            chunksize = 20e6L, 
+            field = "", 
+            count_as_float = FALSE, 
+            one_based = FALSE, 
+            comment_char = "#", 
+            input_copy_status = NULL, 
+            no_symmetric_upper = FALSE, 
+            storage_options = NULL
+        ) |> reticulate::py_capture_output() |> write(sinked_log, append = TRUE)
+    }
+    else {
+        file.copy(contact_map_rebinned, contact_map_filtered)
+    }
 
     ## -------- Generate a multi-resolution mcool file
     message("HiCool :: Generating multi-resolution .mcool file...")
@@ -332,4 +361,3 @@ HiCool <- function(
     )
     return(hash)
 }
-
