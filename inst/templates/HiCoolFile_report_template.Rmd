@@ -16,7 +16,11 @@ td, th {
 }
 </style>
 
-```{r echo = FALSE}
+```{r echo = FALSE, return = FALSE}
+## -- Load required libraries
+require(HiCExperiment)
+require(HiContacts)
+
 ## -- knitr default options 
 knitr::opts_chunk$set(echo = FALSE)
 
@@ -105,7 +109,7 @@ x
 \ Minimum # of restriction sites to retain \`+-\` pairs: `r parsed_stats[['threshold_uncut']]`  
 \ Minimum # of restriction sites to retain \`-+\` pairs: `r parsed_stats[['threshold_self']]`  
 
-```{r}
+```{r "Camembert plot"}
 df <- data.frame(
     type = c(
         "Valid pairs (unique)", 
@@ -157,34 +161,37 @@ fig
 ## Hi-C quality control
 
 ```{r}
-library(HiContacts)
-hcf <- import(file_cool, pairsFile = file_pairs)
-ps <- HiContacts::distanceLaw(hcf, by_chr = TRUE)
-fig <- plotly::plot_ly(
-    ps, 
-    x = ~binned_distance, y = ~norm_p, 
-    type = 'scatter', mode = 'lines', 
-    color = ~chr,
-    showlegend = TRUE
-)
-fig <- fig |> plotly::layout(
-    title = paste0(
-        "P(s) of ", gsub('.pairs', '', basename(pairsFile(x))), " valid pairs"
-    ), 
-    xaxis = list(
-        title = 'Distance between interacting loci (s)', 
-        type = "log", 
-        range = c(log10(5000), log10(4.99e5))
-    ),
-    yaxis = list(
-        title = 'Normalized P(s)', 
-        type = "log"
+if (require(HiContacts)) {
+    hcf <- import(file_cool, pairsFile = file_pairs)
+    ps <- HiContacts::distanceLaw(hcf, by_chr = TRUE)
+    fig <- plotly::plot_ly(
+        ps, 
+        x = ~binned_distance, y = ~norm_p, 
+        type = 'scatter', mode = 'lines', 
+        color = ~chr,
+        showlegend = TRUE
     )
-)
-fig
+    fig <- fig |> plotly::layout(
+        title = paste0(
+            "P(s) of ", gsub('.pairs', '', basename(pairsFile(x))), " valid pairs"
+        ), 
+        xaxis = list(
+            title = 'Distance between interacting loci (s)', 
+            type = "log", 
+            range = c(log10(5000), log10(4.99e5))
+        ),
+        yaxis = list(
+            title = 'Normalized P(s)', 
+            type = "log"
+        )
+    )
+    fig
+} else {
+    message("Install HiContacts package to compute distance law and % of trans contacts")
+    message("`BiocManager::install('HiContacts')`")
+}
 ```
 
-distance law per chr.
 cis/trans per chr.
 
 ## Session information

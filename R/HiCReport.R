@@ -17,7 +17,6 @@
 #' @importFrom sessioninfo python_info
 #' @importFrom BiocIO resource
 #' @importFrom S4Vectors metadata
-#' @importFrom HiContacts distanceLaw
 #' @export
 #' @examples 
 #' HiCReport(hcf)

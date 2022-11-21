@@ -64,7 +64,7 @@
 
 #r1 = '/home/rsg/repos/HiContactsData/data/HiC_wt_yeast.R1.fq.gz'
 #r2 = '/home/rsg/repos/HiContactsData/data/HiC_wt_yeast.R2.fq.gz'
-#hcf <- HiCool(r1, r2, 'seq.fa', output = './HiCool/')
+#hcf <- HiCool(r1, r2, '~/genomes/S288c/S288c', output = './HiCool/')
 
 HiCool <- function(
     r1, 
