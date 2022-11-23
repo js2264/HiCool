@@ -28,7 +28,8 @@ Imports:
     rmdformats,
     plotly,
     stringr,
-    sessioninfo
+    sessioninfo, 
+    utils
 Suggests:
     AnnotationHub, 
     testthat,
@@ -43,3 +44,4 @@ LazyData: false
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.2
 Config/testthat/edition: 3
+StagedInstall: no

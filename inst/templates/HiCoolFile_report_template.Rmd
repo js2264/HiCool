@@ -40,7 +40,8 @@ df_args <- lapply(
             )
         )
     }
-) |> dplyr::bind_rows()
+)
+df_args <- do.call(rbind, df_args)
 parsed_stats <- metadata(x)$stats
 
 ## -- Generate strings for text 

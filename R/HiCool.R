@@ -205,15 +205,15 @@ HiCool <- function(
     log[length(log)+1] <- paste0('#### ::: WD ::: ', getwd()) 
 
     ## -------- Automatically deduce appropriate resolutions if unspecified
-    chrs <- read.delim(file.path(tmp_folder, paste0(prefix, '.chr.tsv')), sep = '\t') 
+    chrs <- utils::read.delim(file.path(tmp_folder, paste0(prefix, '.chr.tsv')), sep = '\t') 
     if (is.null(resolutions)) { 
         tot_length <- sum(chrs$length)
-        resolutions_idx <- dplyr::case_when(
-            tot_length < 16000 ~ 1,
-            tot_length >= 16000 & tot_length < 100000000 ~ 2,
-            tot_length >= 100000000 & tot_length < 1000000000 ~ 3,
+        resolutions_idx <- ifelse(
+            tot_length < 16000, 1, ifelse(
+            tot_length >= 16000 & tot_length < 100000000, 2, ifelse(
+            tot_length >= 100000000 & tot_length < 1000000000, 3,
             tot_length >= 1000000000 ~ 4
-        )
+        )))
         list_resolutions <- list(
             c(100, 200, 400, 800, 1600),
             c(1000, 2000, 4000, 8000, 16000),

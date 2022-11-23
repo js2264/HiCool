@@ -10,7 +10,7 @@ HiCool(
   r1,
   r2,
   genome,
-  resolutions = "1000,2000,4000,8000,16000",
+  resolutions = NULL,
   restriction = "DpnII,HinfI",
   iterative = TRUE,
   filter = TRUE,
