@@ -1,18 +1,22 @@
 ---
 title: 'Single HiC QC report'
 date: "`r date()`"
-user: 'HiCool'
-output:
-    rmdformats::readthedown:
-        highlight: tango
-        toc: 3
+author: 'HiCool'
+format:
+    html:
+        css: "%CSS%"
+        highlight-style: github
+        code-block-bg: true
+        code-block-border-left: "#3e3e3e"
+        toc: true
+        toc-depth: 2
         self-contained: true
         embed-resources: true
+execute:
+    echo: false
 ---
 
-```{r echo = FALSE, return = FALSE, output = FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-
+```{r return = FALSE, output = FALSE}
 ## -- Load required libraries
 require(HiCExperiment)
 require(HiCool)
@@ -80,7 +84,7 @@ string_runtime <- .dhms(as.numeric(difftime(string_date_end, string_date_start))
 
 **Command**  
 
-```{r, comment = ""}
+```{r}
 if (length(list_args)) {
     df_args <- lapply(
         seq_len(length(list_args)-1), 
@@ -107,7 +111,7 @@ if (length(list_args)) {
 ```
 
 \ **Output**
-```{r echo = TRUE}
+```{r}
 x
 ```
 

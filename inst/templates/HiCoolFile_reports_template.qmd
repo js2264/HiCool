@@ -1,0 +1,247 @@
+---
+title: 'Multi-HiC QC report'
+date: "`r date()`"
+author: 'HiCool'
+format:
+    html:
+        theme: cosmo
+        highlight: github
+        toc: true
+        toc-depth: 2
+        self-contained: true
+        embed-resources: true
+execute:
+    echo: false
+---
+
+<style>
+td, th {
+   border: none!important;
+   font-size: 110%!important;
+}
+</style>
+
+```{r echo = FALSE, return = FALSE}
+## -- Load required libraries
+require(HiCExperiment)
+require(HiContacts)
+
+## -- Find path to files
+file_cool <- file.path(wd, resource(x))
+file_log <- file.path(wd, metadata(x)$log)
+file_pairs <- file.path(wd, pairsFile(x))
+df_args <- lapply(
+    seq_along(metadata(x)$args), 
+    function(K) {
+        data.frame(
+            arg = names(metadata(x)$args)[K], 
+            value = ifelse(
+                is.character(metadata(x)$args[[K]]), 
+                paste0('"', metadata(x)$args[[K]], '"'), 
+                as.character(metadata(x)$args[[K]])
+            )
+        )
+    }
+)
+df_args <- do.call(rbind, df_args)
+parsed_stats <- metadata(x)$stats
+
+## -- Generate strings for text 
+string_hicool <- paste0("HiCool v. ", packageVersion('HiCool'))
+string_r1 <- metadata(x)$args[['r1']]
+string_r2 <- metadata(x)$args[['r2']]
+string_genome <- metadata(x)$args[['genome']]
+string_folder <- gsub(
+    ".*::: WD ::: ", "", 
+    grep('::: WD :::', readLines(gsub('.log$', '.stats', file_log)), 
+    value = TRUE)
+)
+string_date_start <- gsub(".*: ", "", readLines(file_log)[2])
+string_date_end <- gsub(
+    ",", " ", 
+    gsub(" ::.*", "", readLines(file_log)[length(readLines(file_log))])
+)
+string_runtime <- .dhms(as.numeric(difftime(string_date_end, string_date_start)))
+```
+
+## Processing
+
+\ **Run time**  
+\ Started @ `r string_date_start`  
+\ Finished @ `r string_date_end`  
+\ Duration: `r string_runtime`
+
+\ **Working directory**  
+\ ```r string_folder```  
+  
+\ **Reads location**  
+\ R1: ```r string_r1```  
+\ R2: ```r string_r2```  
+
+\ **Genome reference**  
+\ ```r string_genome``` 
+
+\ **Command**
+```{r echo = FALSE, eval = TRUE, comment=""}
+message(
+    "HiCool::HiCool(\n", 
+    paste0(apply(df_args, 1, function(x) {paste0("\t", x[1], " = ", x[2])}), collapse = ',\n'), 
+    "\n)"
+)
+```
+
+\ **Output**
+```{r echo = FALSE, eval = TRUE}
+x
+```
+
+<hr>
+
+## Mapping results
+
+| | |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| **Number of paired-end fragments**                                  | `r formatC(parsed_stats$nFragments, format = "f", big.mark = ",", digits = 0)`     |
+| **Total number of pairs after mapping**                             | `r paste0(formatC(parsed_stats$nPairs, format = "f", big.mark = ",", digits = 0))`         |
+| **Number of valid pairs**                                           | `r paste0(formatC(parsed_stats$nFiltered, format = "f", big.mark = ",", digits = 0), ' (', round(parsed_stats$nFiltered / parsed_stats$nPairs, 4) * 100, '% of all pairs)')`         |
+| **Number of unique valid pairs**                                    | `r paste0(formatC(parsed_stats$nUnique, format = "f", big.mark = ",", digits = 0), ' (', round(parsed_stats$nUnique / parsed_stats$nPairs, 4) * 100, '% of all pairs)')`         |
+| Number of pairs from uncut fragments (+-)                           | `r paste0(formatC(parsed_stats$nDangling, format = "f", big.mark = ",", digits = 0), ' (', round(parsed_stats$nDangling / parsed_stats$nPairs, 4) * 100, '% of all pairs)')`         |
+| Number of pairs from self-religated fragments (-+)                  | `r paste0(formatC(parsed_stats$nSelf, format = "f", big.mark = ",", digits = 0), ' (', round(parsed_stats$nSelf / parsed_stats$nPairs, 4) * 100, '% of all pairs)')`         |
+| Number of dumped pairs (-- or ++)                                   | `r paste0(formatC(parsed_stats$nDumped, format = "f", big.mark = ",", digits = 0), ' (', round(parsed_stats$nDumped / parsed_stats$nPairs, 4) * 100, '% of all pairs)')`         |
+
+\ Minimum # of restriction sites to retain \`+-\` pairs: `r parsed_stats[['threshold_uncut']]`  
+\ Minimum # of restriction sites to retain \`-+\` pairs: `r parsed_stats[['threshold_self']]`  
+
+```{r "Camembert plot"}
+df <- data.frame(
+    type = c(
+        "Valid pairs (unique)", 
+        "Valid pairs (duplicates)", 
+        'Dangling fragments ("uncut")', 
+        'Self-religated fragments ("loops")', 
+        'Invalid pairs ("dumped")'  
+    ), 
+    score = c(
+        parsed_stats$nUnique, 
+        parsed_stats$nDups, 
+        parsed_stats$nDangling, 
+        parsed_stats$nSelf, 
+        parsed_stats$nDumped
+    ), 
+    text = c(
+        paste0("Valid pairs (unique):\n", formatC(parsed_stats$nUnique, format = "f", big.mark = ",", digits = 0), ' (', round(parsed_stats$nUnique / parsed_stats$nPairs, 4) * 100, '% of all pairs)'),
+        paste0("Valid pairs (duplicates):\n", formatC(parsed_stats$nDups, format = "f", big.mark = ",", digits = 0), ' (', round(parsed_stats$nDups / parsed_stats$nPairs, 4) * 100, '% of all pairs)'),
+        paste0('Dangling fragments ("uncut"):\n', formatC(parsed_stats$nDangling, format = "f", big.mark = ",", digits = 0), ' (', round(parsed_stats$nDangling / parsed_stats$nPairs, 4) * 100, '% of all pairs)'),
+        paste0('Self-religated fragments ("loops"):\n', formatC(parsed_stats$nSelf, format = "f", big.mark = ",", digits = 0), ' (', round(parsed_stats$nSelf / parsed_stats$nPairs, 4) * 100, '% of all pairs)'),
+        paste0('Invalid pairs ("dumped"):\n', formatC(parsed_stats$nDumped, format = "f", big.mark = ",", digits = 0), ' (', round(parsed_stats$nDumped / parsed_stats$nPairs, 4) * 100, '% of all pairs)')
+    )
+)
+colors <- c('#D35E60', '#f3b6b7', '#5ec9d3', '#5ed371', '#d3b25e')
+fig <- plotly::plot_ly(
+    df, labels = ~type, values = ~score, type = 'pie',
+    textposition = 'inside',
+    textinfo = 'percent',
+    insidetextfont = list(color = '#FFFFFF'),
+    hoverinfo = 'text',
+    text = ~text,
+    marker = list(
+        colors = colors,
+        line = list(color = '#FFFFFF', width = 3), 
+        pull = 0.1
+    ),
+    showlegend = TRUE
+)
+fig <- fig |> plotly::layout(
+    title = paste0(
+        'Distribution of pairs in \n', 
+        gsub('.pairs', '', basename(pairsFile(x))), ' sample'
+    ), 
+    margin = list(t = 150)
+)
+fig
+```
+
+## Hi-C quality control
+
+```{r}
+if (require(HiContacts)) {
+    hcf <- import(file_cool, pairsFile = file_pairs)
+    ps <- HiContacts::distanceLaw(hcf, by_chr = TRUE)
+    fig <- plotly::plot_ly(
+        ps, 
+        x = ~binned_distance, y = ~norm_p, 
+        type = 'scatter', mode = 'lines', 
+        color = ~chr,
+        showlegend = TRUE
+    )
+    fig <- fig |> plotly::layout(
+        title = paste0(
+            "P(s) of ", gsub('.pairs', '', basename(pairsFile(x))), " valid pairs"
+        ), 
+        xaxis = list(
+            title = 'Distance between interacting loci (s)', 
+            type = "log", 
+            range = c(log10(5000), log10(4.99e5))
+        ),
+        yaxis = list(
+            title = 'Normalized P(s)', 
+            type = "log"
+        )
+    )
+    fig
+} else {
+    message("Install HiContacts package to compute distance law and % of trans contacts")
+    message("`BiocManager::install('HiContacts')`")
+}
+```
+
+cis/trans per chr.
+
+## Session information
+
+> System
+
+```{r}
+message(
+    "OS:\t\t\t\t", sessioninfo::os_name(), '\n',
+    "system:\t\t\t", version$system, '\n',
+    "UI:\t\t\t\t", .Platform$GUI, '\n',
+    "R:\t\t\t\t", paste(
+        version$major, version$minor, sep = '.'
+    ), "(", R.home(), ")", '\n',
+    "Python:\t\t\t", basilisk::listPythonVersion(env_HiCool), "(", file.path(
+        basilisk::obtainEnvironmentPath(env_HiCool), 'bin', 'python'
+    ), ")", '\n',
+    "Bioconductor:\t", BiocManager::version(), '\n',
+    "basilisk:\t\t", packageVersion('basilisk'), '\n',
+    "HiCExperiment:\t", packageVersion('HiCExperiment'), '\n',
+    "HiCool:\t\t\t", packageVersion('HiCool'), '\n'
+)
+```
+
+> System packages
+
+```{r}
+message(
+    "samtools: \t", gsub('.*==', '', grep('samtools', .HiCool_dependencies, value = TRUE)), "\n",
+    "bowtie2: \t", gsub('.*==', '', grep('bowtie2', .HiCool_dependencies, value = TRUE)), "\n"
+)
+```
+
+> R packages 
+
+```{r}
+sessioninfo::package_info()
+```
+
+> Python environment
+
+```{r}
+sessioninfo::python_info()
+```
+
+> Python packages
+
+```{r}
+basilisk::listPackages(env_HiCool)
+```

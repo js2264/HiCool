@@ -44,6 +44,7 @@
 #' @importFrom basilisk basiliskStart
 #' @importFrom basilisk basiliskStop
 #' @importFrom basilisk basiliskRun
+#' @importFrom utils read.delim
 #' @export
 #' 
 #' @examples 
@@ -108,33 +109,10 @@ HiCool <- function(
         scratch = scratch  
     )
     hcf <- importHiCoolFolder(output, hash)
-    metadata(hcf)$stats <- .getHicStats(gsub('.log$', '.stats', metadata(hcf)$log), filtered = filter, iterative = iterative)
-    metadata(hcf)$args <- list(
-        r1 = r1,
-        r2 = r2,
-        genome = genome,
-        resolutions = resolutions,
-        restriction = restriction,
-        iterative = iterative,
-        filter = filter,
-        threads = threads,
-        output = output,
-        exclude_chr = exclude_chr,
-        keep_bam = keep_bam,
-        scratch = scratch
-    )
     message("HiCool :: .fastq to .mcool processing done!")
     message("HiCool :: Check ", output, "folder to find the generated files")
-
-    ## -- Create HiCool report 
-    if (build_report) {
-        message("HiCool :: Creating HiCool report...")
-        HiCReport(hcf)
-        message("HiCool :: All processing successfully achieved. Congrats!")
-    }
-    else {
-        message("HiCool :: Run `HiCool::HiCReport(x)` to generate a report for this CoolFile.")
-    }
+    message("HiCool :: In a new R session, run `HiCool::HiCReport(x)` to generate a report for this CoolFile.")
+    message("HiCool :: All processing successfully achieved. Congrats!")
 
     return(hcf)
 }
@@ -201,8 +179,23 @@ HiCool <- function(
         distance_law = TRUE
     ) |> reticulate::py_capture_output() |> write(sinked_log)
     log_file <- list.files(tmp_folder, pattern = paste0(hash, '.hicstuff_'), full.names = TRUE)
-    log <- readLines(log_file)
-    log[length(log)+1] <- paste0('#### ::: WD ::: ', getwd()) 
+    writeLines(c(
+        paste0("HiCool working directory ::: ", getwd()),
+        paste0("HiCool argument ::: r1: ", r1),
+        paste0("HiCool argument ::: r2: ", r2),
+        paste0("HiCool argument ::: genome: ", genome),
+        paste0("HiCool argument ::: resolutions: ", resolutions),
+        paste0("HiCool argument ::: restriction: ", restriction),
+        paste0("HiCool argument ::: iterative: ", iterative),
+        paste0("HiCool argument ::: filter: ", filter),
+        paste0("HiCool argument ::: threads: ", threads),
+        paste0("HiCool argument ::: output: ", output),
+        paste0("HiCool argument ::: exclude_chr: ", exclude_chr),
+        paste0("HiCool argument ::: keep_bam: ", keep_bam),
+        paste0("HiCool argument ::: scratch: ", scratch),
+        "----------------",
+        readLines(log_file)
+    ), log_file)
 
     ## -------- Automatically deduce appropriate resolutions if unspecified
     chrs <- utils::read.delim(file.path(tmp_folder, paste0(prefix, '.chr.tsv')), sep = '\t') 
@@ -349,15 +342,14 @@ HiCool <- function(
         file.path(output, 'plots', paste0(prefix, '_event_distribution.pdf'))
     )
 
+    message("HiCool :: Tidying up everything for you --------------------------------")
+    log_file
     # Log
     dir.create(file.path(output, 'logs'), showWarnings = FALSE, recursive = TRUE)
     file.copy(
-        log_file, 
+        log_file,
         file.path(output, 'logs', paste0(prefix, '.log'))
     )
-    writeLines(
-        log,
-        file.path(output, 'logs', paste0(prefix, '.stats'))
-    )
+    message("HiCool :: Tidying up everything for you +++++++++++++++++++++++")
     return(hash)
 }

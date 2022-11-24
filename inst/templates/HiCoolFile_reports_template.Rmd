@@ -1,0 +1,160 @@
+---
+title: 'Multi-HiC QC report'
+date: "`r date()`"
+user: 'HiCool'
+output:
+    rmdformats::readthedown:
+        highlight: tango
+        toc: 3
+        self-contained: true
+        embed-resources: true
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, return = FALSE, output = FALSE}
+## -- Load required libraries
+require(HiCExperiment)
+require(HiCool)
+
+## -- Parse data 
+log_files <- "%LOGS%" |> 
+    strsplit(',') |> 
+    unlist()
+file_cools <- lapply(log_files, function(x) {
+    gsub(".log$", ".mcool", gsub("logs", "matrices", x))
+})
+file_pairs <- lapply(log_files, function(x) {
+    gsub(".log$", ".pairs", gsub("logs", "pairs", x))
+})
+cfs <- lapply(seq_along(log_files), function(i) {
+    HiCExperiment::CoolFile(
+        file_cools[[i]], 
+        pairs = file_pairs[[i]], 
+        metadata = list(
+            log = log_files[[i]], 
+            args = getHiCoolArgs(log_files[[i]]), 
+            stats = getHicStats(log_files[[i]])
+        )
+    )
+})
+```
+
+## Samples
+
+\ **Cool files**  
+
+<hr>
+
+## Mapping results
+
+```{r "Camembert plot"}
+df_l <- lapply(cfs, function(x) {
+    list_stats <- metadata(x)$stats
+    df <- data.frame(
+        type = c(
+            "Valid pairs (unique)", 
+            "Valid pairs (duplicates)", 
+            'Dangling fragments ("uncut")', 
+            'Self-religated fragments ("loops")', 
+            'Invalid pairs ("dumped")'  
+        ), 
+        score = c(
+            list_stats$nUnique, 
+            list_stats$nDups, 
+            list_stats$nDangling, 
+            list_stats$nSelf, 
+            list_stats$nDumped
+        ), 
+        text = c(
+            paste0("Valid pairs (unique):\n", formatC(list_stats$nUnique, format = "f", big.mark = ",", digits = 0), ' (', round(list_stats$nUnique / list_stats$nPairs, 4) * 100, '% of all pairs)'),
+            paste0("Valid pairs (duplicates):\n", formatC(list_stats$nDups, format = "f", big.mark = ",", digits = 0), ' (', round(list_stats$nDups / list_stats$nPairs, 4) * 100, '% of all pairs)'),
+            paste0('Dangling fragments ("uncut"):\n', formatC(list_stats$nDangling, format = "f", big.mark = ",", digits = 0), ' (', round(list_stats$nDangling / list_stats$nPairs, 4) * 100, '% of all pairs)'),
+            paste0('Self-religated fragments ("loops"):\n', formatC(list_stats$nSelf, format = "f", big.mark = ",", digits = 0), ' (', round(list_stats$nSelf / list_stats$nPairs, 4) * 100, '% of all pairs)'),
+            paste0('Invalid pairs ("dumped"):\n', formatC(list_stats$nDumped, format = "f", big.mark = ",", digits = 0), ' (', round(list_stats$nDumped / list_stats$nPairs, 4) * 100, '% of all pairs)')
+        )
+    )
+    df$sample = basename(resource(x))
+    return(df)
+})
+df <- do.call(rbind, df_l)
+colors <- c('#D35E60', '#f3b6b7', '#5ec9d3', '#5ed371', '#d3b25e')
+fig <- plotly::plot_ly(
+    df, 
+    x = ~sample, 
+    y = ~score, 
+    color = ~type,
+    type = 'bar',
+    textposition = 'inside',
+    textinfo = 'percent',
+    insidetextfont = list(color = '#FFFFFF'),
+    hoverinfo = 'text',
+    text = ~text,
+    marker = list(
+        colors = colors
+    ),
+    showlegend = TRUE
+)
+fig <- fig |> plotly::layout(
+    title = paste0(
+        'Distribution of pairs in samples'), 
+    margin = list(t = 150)
+)
+fig
+```
+
+## Hi-C quality control
+
+
+## Session information
+
+> System
+
+```{r}
+message(
+    "OS:\t\t\t\t", sessioninfo::os_name(), '\n',
+    "system:\t\t\t", version$system, '\n',
+    "UI:\t\t\t\t", .Platform$GUI, '\n',
+    "R:\t\t\t\t", paste(
+        version$major, version$minor, sep = '.'
+    ), "(", R.home(), ")", '\n',
+    "Python:\t\t\t", basilisk::listPythonVersion(HiCool:::env_HiCool), "(", file.path(
+        basilisk::obtainEnvironmentPath(HiCool:::env_HiCool), 'bin', 'python'
+    ), ")", '\n',
+    "Bioconductor:\t", BiocManager::version(), '\n',
+    "basilisk:\t\t", packageVersion('basilisk'), '\n',
+    "HiCExperiment:\t", packageVersion('HiCExperiment'), '\n',
+    "HiCool:\t\t\t", packageVersion('HiCool'), '\n'
+)
+```
+
+> System packages
+
+```{r}
+message(
+    "samtools: \t", gsub('.*==', '', grep('samtools', HiCool:::.HiCool_dependencies, value = TRUE)), "\n",
+    "bowtie2: \t", gsub('.*==', '', grep('bowtie2', HiCool:::.HiCool_dependencies, value = TRUE)), "\n"
+)
+```
+
+> R packages 
+
+```{r}
+sessioninfo::package_info()
+```
+
+> Python environment
+
+```{r}
+proc <- basilisk::basiliskStart(HiCool:::env_HiCool)
+sessioninfo::python_info()
+basilisk::basiliskStop(proc)
+```
+
+> Python packages
+
+```{r}
+basilisk::listPackages(HiCool:::env_HiCool)
+```

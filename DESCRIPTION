@@ -23,7 +23,6 @@ Imports:
     S4Vectors,
     basilisk,
     reticulate,
-    usethis,
     rmarkdown,
     rmdformats,
     plotly,
