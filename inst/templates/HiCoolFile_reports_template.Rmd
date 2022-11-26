@@ -14,7 +14,7 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-```{r, return = FALSE, output = FALSE}
+```{r, return = FALSE, output = FALSE, message = FALSE}
 ## -- Load required libraries
 require(HiCExperiment)
 require(HiCool)
@@ -23,86 +23,143 @@ require(HiCool)
 log_files <- "%LOGS%" |> 
     strsplit(',') |> 
     unlist()
+names(log_files) <- gsub('\\^.*', '', basename(log_files))
 file_cools <- lapply(log_files, function(x) {
-    gsub(".log$", ".mcool", gsub("logs", "matrices", x))
+    f <- gsub(".log$", ".mcool", gsub("logs", "matrices", x))
+    if (!file.exists(f)) {
+        message(paste0(x, ': associated cool file not found.'))
+        return("")
+    }
+    else {
+        return(f)
+    }
 })
 file_pairs <- lapply(log_files, function(x) {
-    gsub(".log$", ".pairs", gsub("logs", "pairs", x))
+    f <- gsub(".log$", ".pairs", gsub("logs", "pairs", x))
+    if (!file.exists(f)) {
+        message(paste0(x, ': associated pairs file not found.'))
+        return("")
+    }
+    else {
+        return(f)
+    }
 })
-cfs <- lapply(seq_along(log_files), function(i) {
-    HiCExperiment::CoolFile(
-        file_cools[[i]], 
-        pairs = file_pairs[[i]], 
-        metadata = list(
-            log = log_files[[i]], 
-            args = getHiCoolArgs(log_files[[i]]), 
-            stats = getHicStats(log_files[[i]])
-        )
-    )
-})
+stats <- lapply(log_files, HiCool::getHicStats) |> 
+    dplyr::bind_rows(.id = 'sample') |> 
+    dplyr::mutate(sample = factor(sample, make.unique(names(log_files))))
 ```
 
 ## Samples
 
-\ **Cool files**  
+```{r, comment = ""}
+if (all(file_cools != "")) {
+    cfs <- lapply(seq_along(log_files), function(i) {
+        HiCExperiment::CoolFile(
+            file_cools[[i]], 
+            pairs = file_pairs[[i]], 
+            metadata = list(
+                log = log_files[[i]], 
+                args = getHiCoolArgs(log_files[[i]]), 
+                stats = getHicStats(log_files[[i]])
+            )
+        )
+    })
+    names(cfs) <- gsub('\\^.*', '', basename(log_files))
+    cfs
+} else {
+    message("Only log files are available:")
+    writeLines(paste0('$ ', log_files))
+}
+```
 
 <hr>
 
 ## Mapping results
 
-```{r "Camembert plot"}
-df_l <- lapply(cfs, function(x) {
-    list_stats <- metadata(x)$stats
-    df <- data.frame(
-        type = c(
-            "Valid pairs (unique)", 
-            "Valid pairs (duplicates)", 
-            'Dangling fragments ("uncut")', 
-            'Self-religated fragments ("loops")', 
-            'Invalid pairs ("dumped")'  
-        ), 
-        score = c(
-            list_stats$nUnique, 
-            list_stats$nDups, 
-            list_stats$nDangling, 
-            list_stats$nSelf, 
-            list_stats$nDumped
-        ), 
-        text = c(
-            paste0("Valid pairs (unique):\n", formatC(list_stats$nUnique, format = "f", big.mark = ",", digits = 0), ' (', round(list_stats$nUnique / list_stats$nPairs, 4) * 100, '% of all pairs)'),
-            paste0("Valid pairs (duplicates):\n", formatC(list_stats$nDups, format = "f", big.mark = ",", digits = 0), ' (', round(list_stats$nDups / list_stats$nPairs, 4) * 100, '% of all pairs)'),
-            paste0('Dangling fragments ("uncut"):\n', formatC(list_stats$nDangling, format = "f", big.mark = ",", digits = 0), ' (', round(list_stats$nDangling / list_stats$nPairs, 4) * 100, '% of all pairs)'),
-            paste0('Self-religated fragments ("loops"):\n', formatC(list_stats$nSelf, format = "f", big.mark = ",", digits = 0), ' (', round(list_stats$nSelf / list_stats$nPairs, 4) * 100, '% of all pairs)'),
-            paste0('Invalid pairs ("dumped"):\n', formatC(list_stats$nDumped, format = "f", big.mark = ",", digits = 0), ' (', round(list_stats$nDumped / list_stats$nPairs, 4) * 100, '% of all pairs)')
-        )
+```{r}
+stats
+```
+
+```{r}
+df <- dplyr::select(stats, sample, nFragments, nPairs, nFiltered, nUnique) |> 
+    dplyr::rename(
+        `All fragments` = nFragments, 
+        `Mapped pairs` = nPairs, 
+        `Filtered pairs` = nFiltered,
+        `Unique pairs` = nUnique
+    ) |>
+    tidyr::pivot_longer(-c(sample), names_to = 'val', values_to = 'number') |>
+    dplyr::mutate(val = factor(val, 
+        c("All fragments", "Mapped pairs", "Filtered pairs", "Unique pairs"))
     )
-    df$sample = basename(resource(x))
-    return(df)
-})
-df <- do.call(rbind, df_l)
-colors <- c('#D35E60', '#f3b6b7', '#5ec9d3', '#5ed371', '#d3b25e')
-fig <- plotly::plot_ly(
+fig1 <- plotly::plot_ly(
     df, 
     x = ~sample, 
-    y = ~score, 
-    color = ~type,
+    y = ~number, 
+    color = ~val,
     type = 'bar',
-    textposition = 'inside',
-    textinfo = 'percent',
-    insidetextfont = list(color = '#FFFFFF'),
-    hoverinfo = 'text',
-    text = ~text,
-    marker = list(
-        colors = colors
-    ),
+    hoverinfo = ~number,
     showlegend = TRUE
-)
-fig <- fig |> plotly::layout(
-    title = paste0(
-        'Distribution of pairs in samples'), 
-    margin = list(t = 150)
-)
-fig
+) |> 
+    plotly::layout(
+        yaxis = list(title = 'Total # of fragments'), 
+        xaxis = list(title = ''), 
+        legend = list(orientation = 'h')
+    )
+fig1
+```
+
+</br>
+</br>
+
+```{r}
+df <- stats |> 
+    dplyr::rowwise() |> 
+    dplyr::mutate(
+        nUnmapped = nFragments-nPairs
+    ) |> 
+    dplyr::select(sample, nUnique, nDups, nDangling, nSelf, nDumped, nUnmapped) |> 
+    dplyr::rename(
+        `Unique filtered pairs` = nUnique, 
+        `Duplicated pairs` = nDups, 
+        `Dangling fragments ('uncut')` = nDangling, 
+        `Self-religated fragments ('loops')` = nSelf, 
+        `Invalid pairs ('dumped')` = nDumped,
+        `Unmapped pairs` = nUnmapped,
+    ) |>
+    tidyr::pivot_longer(-c(sample), names_to = 'val', values_to = 'number') |>
+    dplyr::mutate(val = factor(val, c(
+        "Unique filtered pairs", 
+        "Duplicated pairs", 
+        "Dangling fragments ('uncut')", 
+        "Self-religated fragments ('loops')", 
+        "Invalid pairs ('dumped')", 
+        "Unmapped pairs"
+    ))) |> 
+    dplyr::group_by(sample) |> 
+    dplyr::mutate(pct = number / sum(number) * 100)
+fig2 <- plotly::plot_ly(
+    df, 
+    y = ~sample, 
+    x = ~pct, 
+    color = ~val,
+    type = 'bar',
+    orientation = 'h', 
+    hoverinfo = ~number,
+    showlegend = TRUE
+) |> 
+    plotly::layout(
+        yaxis = list(title = 'Sample'), 
+        xaxis = list(
+            title = '% of sequenced fragments',
+            side = 'top'
+        ),
+        barmode = 'stack', 
+        legend = list(
+            orientation = 'h'
+        )
+    )
+fig2
 ```
 
 ## Hi-C quality control

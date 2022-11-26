@@ -180,8 +180,8 @@ fig
 ## Hi-C quality control
 
 ```{r output = FALSE}
-if (require(HiContacts)) {
-    hcf <- import(file_cool, pairsFile = file_pairs)
+if (requireNamespace("HiContacts", quietly = TRUE)) {
+    hcf <- import(x)
     ps <- HiContacts::distanceLaw(hcf, by_chr = TRUE) |> suppressMessages()
     fig <- plotly::plot_ly(
         ps, 
@@ -207,7 +207,7 @@ if (require(HiContacts)) {
 ```
 
 ```{r}
-if (require(HiContacts)) {
+if (requireNamespace("HiContacts", quietly = TRUE)) {
     fig
 } else {
     message("Install HiContacts package to compute distance law and % of trans contacts")
