@@ -79,11 +79,11 @@ on.exit(unlink('seq.fa'))
 BiocIO::export(BiocIO::import(twobit), con = 'seq.fa', format = 'fasta')
 
 ## -------- Get fastq files from HiContactsData
-#r1 <- HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'r1_fastq')
-#r2 <- HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'r2_fastq')
+r1 <- HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'r1_fastq')
+r2 <- HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'r2_fastq')
 
 ## -------- Run HiCool::HiCool()
 on.exit(unlink('./HiCool/'), add = TRUE)
-#hcf <- HiCool(r1, r2, 'seq.fa', output = './HiCool/')
-#hcf
+hcf <- HiCool(r1, r2, 'seq.fa', output = './HiCool/')
+hcf
 }

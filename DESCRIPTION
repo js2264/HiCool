@@ -30,6 +30,7 @@ Imports:
     sessioninfo, 
     utils
 Suggests:
+    HiContactsData, 
     AnnotationHub, 
     testthat,
     knitr
