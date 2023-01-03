@@ -162,9 +162,6 @@ fig2 <- plotly::plot_ly(
 fig2
 ```
 
-## Hi-C quality control
-
-
 ## Session information
 
 > System
