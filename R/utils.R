@@ -167,10 +167,6 @@ getHicStats <- function(log) {
     return(stats)
 }
 
-.fixHOME <- function(x) {
-    gsub('~', Sys.getenv('HOME'), x)
-}
-
 .dhms <- function(t) {
     paste(
         t %/% (60*60*24), ' days, ',
@@ -184,20 +180,90 @@ getHicStats <- function(log) {
 }
 
 .checkGenome <- function(genome) {
+    
+    ## -- Fetch genome bowtie2 index from refgenie
+    if (genome %in% c('mm10', 'hg38', 'dm6')) {
+        bfc <- BiocFileCache::BiocFileCache()
+        rid_index <- BiocFileCache::bfcquery(bfc, query = paste0('HiCool_', genome))$rid
+        if (!length(rid_index)) {
+            message( "HiCool :: Fetching bowtie genome index archive from regenie..." )
+            archive <- dplyr::case_when(
+                genome == 'hg38' ~ "http://refgenomes.databio.org/v3/assets/archive/2230c535660fb4774114bfa966a62f823fdb6d21acf138d4/bowtie2_index?tag=default", 
+                genome == 'mm10' ~ "http://refgenomes.databio.org/v3/assets/archive/0f10d83b1050c08dd53189986f60970b92a315aa7a16a6f1/bowtie2_index?tag=default",
+                genome == 'dm6' ~ "http://refgenomes.databio.org/v3/assets/archive/8baf9d24ad8f5678f0fe1f5b21a812d410755d49e3123158/bowtie2_index?tag=default"
+            )
+            bfcentry <- BiocFileCache::bfcadd( 
+                bfc, 
+                rname = paste0('HiCool_', genome), 
+                fpath = archive 
+            )
+            rid_index <- names(bfcentry)
+        }
+        tmp_dir <- tempdir()
+        message( "HiCool :: Unzipping bowtie2 genome index from refgenie..." )
+        untar(BiocFileCache::bfcrpath(bfc, rids = rid_index), exdir = tmp_dir)
+        idx.files <- list.files(file.path(tmp_dir, 'default'), full.names = TRUE)
+        idx.base <- gsub('\\..*', '', basename(idx.files)[1])
+        for (file in idx.files) {
+            file.rename(file, gsub(idx.base, genome, file))
+        }
+        genome <- file.path(dirname(idx.files[1]), genome)
+        .checkGenome(genome)
+    }
+
+    ## -- Fetch genome bowtie2 index from AWS S3 iGenomes
+    if (genome %in% c('R64-1-1', 'WBcel235', 'GRCz10', 'Galgal4')) {
+        bfc <- BiocFileCache::BiocFileCache()
+        rid_indices <- BiocFileCache::bfcquery(bfc, query = paste0('HiCool_', genome))$rid
+        if (!length(rid_indices)) {
+            message( "HiCool :: Fetching bowtie genome index files from AWS iGenomes S3 bucket..." )
+            s3url <- "https://ngi-igenomes.S3.amazonaws.com/"
+            S3basepath <- dplyr::case_when(
+                genome == 'R64-1-1' ~ "igenomes/Saccharomyces_cerevisiae/Ensembl/R64-1-1/Sequence/Bowtie2Index/", 
+                genome == 'WBcel235' ~ "igenomes/Caenorhabditis_elegans/Ensembl/WBcel235/Sequence/Bowtie2Index/", 
+                genome == 'GRCz10' ~ "igenomes/Danio_rerio/Ensembl/GRCz10/Sequence/Bowtie2Index/", 
+                genome == 'Galgal4' ~ "igenomes/Gallus_gallus/Ensembl/Galgal4/Sequence/Bowtie2Index/"
+            )
+            for (idx in c('.1.bt2', '.2.bt2', '.3.bt2', '.4.bt2', '.rev.1.bt2', '.rev.2.bt2')) {
+                path <- paste0(s3url, S3basepath, 'genome', idx)
+                BiocFileCache::bfcadd( 
+                    bfc, 
+                    rname = paste0('HiCool_', genome, idx), 
+                    fpath = path 
+                )
+            }
+            rid_indices <- BiocFileCache::bfcquery(bfc, query = paste0('HiCool_', genome))$rid
+        }
+        tmp_dir <- tempdir()
+        message( "HiCool :: Recovering bowtie2 genome index from AWS iGenomes..." )
+        idx.files <- BiocFileCache::bfcpath(bfc, rid_indices)
+        for (file in idx.files) {
+            idx.base <- gsub('\\..*', '', basename(file))
+            file.copy(file, file.path(tmp_dir, basename(gsub(idx.base, genome, file))))
+        }
+        genome <- file.path(tmp_dir, genome)
+        .checkGenome(genome)
+    }
+
+    ## -- Fetch local fasta file
     if (grepl('.fa$|.fasta$', genome)) {
         if (!file.exists(genome)) {
             stop("Genome fasta file not found.")
         }
-    }
-    else {
-        idx1 <- paste0(genome, '.1.bt2')
-        idx2 <- paste0(genome, '.2.bt2')
-        idx3 <- paste0(genome, '.3.bt2')
-        idx4 <- paste0(genome, '.4.bt2')
-        idx5 <- paste0(genome, '.rev.1.bt2')
-        idx6 <- paste0(genome, '.rev.2.bt2')
-        if (any(!file.exists(idx1, idx2, idx3, idx4, idx5, idx6))) {
-            stop("Genome bowtie2 index detected, but some index files are missing.")
+        else {
+            return(normalizePath(genome))
         }
     }
+
+    ## -- Fetch local bowtie2 index files
+    idx1 <- paste0(genome, '.1.bt2')
+    idx2 <- paste0(genome, '.2.bt2')
+    idx3 <- paste0(genome, '.3.bt2')
+    idx4 <- paste0(genome, '.4.bt2')
+    idx5 <- paste0(genome, '.rev.1.bt2')
+    idx6 <- paste0(genome, '.rev.2.bt2')
+    if (all(file.exists(idx1, idx2, idx3, idx4, idx5, idx6))) {
+        return(normalizePath(genome))
+    }
+    stop("Genome bowtie2 index detected, but some index files are missing.")
 }
