@@ -33,10 +33,10 @@
 HiCReport <- function(x, output = NULL) {
 
     ## --- Parse CoolFile for info
-    mcool <- BiocIO::resource(x)
-    pairs <- pairsFile(x)
-    log_file <- S4Vectors::metadata(x)$log
-    
+    mcool <- normalizePath(BiocIO::resource(x))
+    pairs <- normalizePath(pairsFile(x))
+    log_file <- normalizePath(S4Vectors::metadata(x)$log)
+
     ## --- Check that all required fields exist
     if (!length(mcool))
         stop("No cool file was found.")
@@ -80,7 +80,7 @@ HiCReport <- function(x, output = NULL) {
     file.copy(tmpHtml, output)
     unlink(tmpRmd)
     unlink(tmpHtml)
-    message("Report generated and available @ ", output)
+    message("HiCool :: Report generated and available @ ", output)
     TRUE
 }
 

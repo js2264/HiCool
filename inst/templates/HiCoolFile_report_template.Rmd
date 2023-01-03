@@ -34,6 +34,7 @@ x <- CoolFile(
         args = list_args
     )
 )
+hic <- import(x)
 
 ## -- Generate strings for text 
 string_hicool <- paste0("HiCool v. ", packageVersion('HiCool'))
@@ -106,9 +107,17 @@ if (length(list_args)) {
 }
 ```
 
-\ **Output**
+\ **Generated HiCExperiment object**
 ```{r echo = TRUE}
 x
+```
+
+```{r eval = FALSE, echo = TRUE}
+import(x)
+```
+
+```{r eval = TRUE, echo = FALSE}
+hic
 ```
 
 <hr>
@@ -181,41 +190,75 @@ fig
 
 ```{r output = FALSE}
 if (requireNamespace("HiContacts", quietly = TRUE)) {
-    hcf <- import(x)
-    ps <- HiContacts::distanceLaw(hcf, by_chr = TRUE) |> suppressMessages()
-    fig <- plotly::plot_ly(
+    ps <- HiContacts::distanceLaw(hic, by_chr = TRUE) |> suppressMessages()
+    fig_ps <- plotly::plot_ly(
         ps, 
         x = ~binned_distance, y = ~norm_p, 
         type = 'scatter', mode = 'lines', 
         color = ~chr,
         showlegend = TRUE
-    )
-    fig <- fig |> plotly::layout(
-        title = paste0(
-            "P(s) of ", gsub('.pairs', '', basename(pairsFile(x))), " valid pairs"
-        ), 
-        xaxis = list(
-            title = 'Distance between interacting loci (s)', 
-            type = "log"
-        ),
-        yaxis = list(
-            title = 'Normalized P(s)', 
-            type = "log"
+    ) |> 
+        plotly::layout(
+            title = paste0(
+                "P(s) of ", gsub('.pairs', '', basename(pairsFile(x))), " valid pairs"
+            ), 
+            xaxis = list(
+                title = 'Distance between interacting loci (s)', 
+                type = "log"
+            ),
+            yaxis = list(
+                title = 'Normalized P(s)', 
+                type = "log"
+            )
         )
-    )
+
+    cistrans <- cisTransRatio(hic)
+    fig_cistrans <- plotly::plot_ly(
+        cistrans, 
+        x = ~chr, y = ~cis_pct*100, 
+        type = 'bar', 
+        name = 'Cis interactions'
+    ) |> 
+        plotly::add_trace(
+            y = ~trans_pct*100, name = 'Trans interactions'
+        ) |> 
+        plotly::layout(
+            barmode = 'stack', 
+            title = paste0(
+                "Proportion of cis interactions within each chromosome"
+            ), 
+            xaxis = list(
+                title = 'Chromosome'
+            ),
+            yaxis = list(
+                title = '% of cis interactions'
+            )
+        )
+
 }
 ```
+
+> Distance-dependent interaction frequency
 
 ```{r}
 if (requireNamespace("HiContacts", quietly = TRUE)) {
-    fig
+    fig_ps
 } else {
-    message("Install HiContacts package to compute distance law and % of trans contacts")
-    message("`BiocManager::install('HiContacts')`")
+    message("Install HiContacts package to compute distance law.")
+    message("BiocManager::install('HiContacts')")
 }
 ```
 
-cis/trans per chr.
+> Cis/trans interaction frequencies
+
+```{r}
+if (requireNamespace("HiContacts", quietly = TRUE)) {
+    fig_cistrans
+} else {
+    message("Install HiContacts package to compute cis/trans interaction frequencies.")
+    message("BiocManager::install('HiContacts')")
+}
+```
 
 ## Session information
 
