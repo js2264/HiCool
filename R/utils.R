@@ -31,6 +31,7 @@
 #' log_path <- HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'HiCool_log')
 #' getHiCoolArgs(log_path)
 #' getHicStats(log_path)
+#' readLines(log_path)
 NULL
 
 #' @export
@@ -201,7 +202,7 @@ getHicStats <- function(log) {
         }
         tmp_dir <- tempdir()
         message( "HiCool :: Unzipping bowtie2 genome index from refgenie..." )
-        untar(BiocFileCache::bfcrpath(bfc, rids = rid_index), exdir = tmp_dir)
+        utils::untar(BiocFileCache::bfcrpath(bfc, rids = rid_index), exdir = tmp_dir)
         idx.files <- list.files(file.path(tmp_dir, 'default'), full.names = TRUE)
         idx.base <- gsub('\\..*', '', basename(idx.files)[1])
         for (file in idx.files) {
@@ -242,7 +243,8 @@ getHicStats <- function(log) {
             file.copy(file, file.path(tmp_dir, basename(gsub(idx.base, genome, file))))
         }
         genome <- file.path(tmp_dir, genome)
-        .checkGenome(genome)
+        genome <- .checkGenome(genome)
+        genome
     }
 
     ## -- Fetch local fasta file
@@ -263,7 +265,8 @@ getHicStats <- function(log) {
     idx5 <- paste0(genome, '.rev.1.bt2')
     idx6 <- paste0(genome, '.rev.2.bt2')
     if (all(file.exists(idx1, idx2, idx3, idx4, idx5, idx6))) {
-        return(normalizePath(genome))
+        genome <- gsub('.1.bt2', '', (normalizePath(idx1)))
+        return(genome)
     }
     stop("Genome bowtie2 index detected, but some index files are missing.")
 }

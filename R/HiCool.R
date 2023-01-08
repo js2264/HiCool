@@ -29,7 +29,9 @@
 #'   (Default: TRUE)
 #' @param filter Should read pairs be filtered (using filtering approach 
 #'   described in Cournac et al., BMC Genomics 2012)? (Default: TRUE)
-#' @param threads Number of CPUs used for parallelization. (Default: 16)
+#' @param balancing_args Balancing arguments for cooler (Default: 
+#' " --cis-only --min-nnz 3 --mad-max 7 ")
+#' @param threads Number of CPUs used for parallelization. (Default: 1)
 #' @param exclude_chr Chromosomes excluded from the final .mcool file. This will 
 #'   not affect the pairs file. (Default: "Mito|chrM|MT")
 #' @param output Path to output directory where processed files will 
@@ -65,8 +67,8 @@ HiCool <- function(
     filter = TRUE, 
     balancing_args = " --cis-only --min-nnz 3 --mad-max 7 ", 
     threads = 1L, 
-    output = 'HiCool', 
     exclude_chr = 'Mito|chrM|MT', 
+    output = 'HiCool', 
     keep_bam = FALSE, 
     build_report = TRUE, 
     scratch = tempdir()  
@@ -74,7 +76,7 @@ HiCool <- function(
 {
     r1 <- normalizePath(r1)
     r2 <- normalizePath(r2)
-    output <- normalizePath(output)
+    output <- normalizePath(output, mustWork = FALSE)
     genome <- .checkGenome(genome)
 
     proc <- basilisk::basiliskStart(env_HiCool)
@@ -136,7 +138,6 @@ HiCool <- function(
     ## ----------- Define variables ----------- ##
     ##############################################
 
-    ## -------- Define variables
     hash <- paste0(sample(c(LETTERS, 0:9), 6, replace = TRUE), collapse = '')
     tmp_folder <- file.path(scratch, hash)
     message("HiCool :: Initiating processing of fastq files [tmp folder: ", tmp_folder, "]...")

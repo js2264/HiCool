@@ -31,4 +31,5 @@ importHiCoolFolder(hcf)
 log_path <- HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'HiCool_log')
 getHiCoolArgs(log_path)
 getHicStats(log_path)
+readLines(log_path)
 }

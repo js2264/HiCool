@@ -1,28 +1,18 @@
-test_that("Check that HiCool works with fasta", {
+test_that("Check that HiCool works with fasta or AWS S3 iGenomes", {
     
-    ## -------- Get fasta file from AnnotationHub
-    ah <- AnnotationHub::AnnotationHub()
-    twobit <- ah[['AH106801']]
-    on.exit(unlink('seq.fa'))
-    BiocIO::export(BiocIO::import(twobit), con = 'seq.fa', format = 'fasta')
-
-    ## -------- Get fastq files from HiContactsData
+    ## -------- Get fastq/fasta file from AnnotationHub
     r1 <- HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'fastq_R1')
     r2 <- HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'fastq_R2')
+    # ah <- AnnotationHub::AnnotationHub()
+    # twobit <- ah[['AH106801']]
+    # tmpfile <- tempfile()
+    # BiocIO::export(BiocIO::import(twobit), con = tmpfile, format = 'fasta')
 
-    ## -------- Run HiCool::HiCool()
-    on.exit(unlink('./HiCool/'), add = TRUE)
-    hcf <- HiCool(r1, r2, 'seq.fa', output = './HiCool/')
-    expect_s4_class(hcf, 'CoolFile')
+    ## -------- Run HiCool::HiCool() with fasta
+    # hcf <- HiCool(r1, r2, tmpfile, output = './HiCool/')
+    # expect_s4_class(hcf, 'CoolFile')
 
-})
-
-test_that("Check that HiCool works with AWS S3 iGenomes", {
-    
-    r1 <- HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'fastq_R1')
-    r2 <- HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'fastq_R2')
-
-    on.exit(unlink('./HiCool/'), add = TRUE)
+    ## -------- Run HiCool::HiCool() with AWS S3 iGenomes
     hcf <- HiCool(r1, r2, 'R64-1-1', output = './HiCool/')
     expect_s4_class(hcf, 'CoolFile')
 

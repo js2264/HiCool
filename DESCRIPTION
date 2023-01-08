@@ -26,12 +26,15 @@ Imports:
     rmarkdown,
     rmdformats,
     plotly,
+    dplyr,
     stringr,
     sessioninfo, 
     utils
 Suggests:
+    HiContacts, 
     HiContactsData, 
-    AnnotationHub, 
+    AnnotationHub,
+    BiocFileCache,  
     testthat,
     knitr
 biocViews:
@@ -42,6 +45,6 @@ Encoding: UTF-8
 VignetteBuilder: knitr
 LazyData: false
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.2
+RoxygenNote: 7.2.3
 Config/testthat/edition: 3
 StagedInstall: no

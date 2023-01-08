@@ -28,7 +28,6 @@
 #' log_path <- HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'HiCool_log')
 #' cf <- CoolFile(mcool_path, pairs = pairs_path, metadata = list(log = log_path))
 #' HiCReport(cf)
-#' HiCReports(logs = c(log_path))
 
 HiCReport <- function(x, output = NULL) {
 
@@ -60,14 +59,30 @@ HiCReport <- function(x, output = NULL) {
         if (!grepl('.html', output))
             output <- paste0(output, '.html')
     }
+    if (file.exists(output)) {
+        if (interactive()) {
+            qtxt <- sprintf(
+                "Output report %s already exists. \nOverwrite it? [Y/n]: ",
+                output
+            )
+            repeat {
+                cat(qtxt)
+                answer <- readLines(n = 1)
+                if (answer %in% c("y", "Y", "n", "N")) break
+            }
+            tolower(answer)
+            if ("n" == answer)
+                stop("Aborting report computing now.")
+        }
+        file.remove(output)
+    }
 
     ## --- Generate report
     tmpdir <- tempdir()
     tmpRmd <- file.path(tmpdir, basename(gsub('.html$', '.Rmd', output)))
     tmpHtml <- file.path(tmpdir, basename(output))
-    unlink(tmpRmd)
-    unlink(tmpHtml)
-    unlink(output)
+    if (file.exists(tmpRmd)) file.remove(tmpRmd)
+    if (file.exists(tmpHtml)) file.remove(tmpHtml)
     file.copy(
         system.file('templates', 'HiCoolFile_report_template.Rmd', package = 'HiCool'), 
         tmpRmd
@@ -78,8 +93,8 @@ HiCReport <- function(x, output = NULL) {
     rmarkdown::render(tmpRmd, quiet = TRUE)
     writeLines(gsub("&amp;quot;", '"', readLines(tmpHtml)), tmpHtml)
     file.copy(tmpHtml, output)
-    unlink(tmpRmd)
-    unlink(tmpHtml)
+    if (file.exists(tmpRmd)) file.remove(tmpRmd)
+    if (file.exists(tmpHtml)) file.remove(tmpHtml)
     message("HiCool :: Report generated and available @ ", output)
     TRUE
 }
@@ -101,14 +116,30 @@ HiCReports <- function(hash, directory = '.', logs = NULL, output = NULL) {
     if (is.null(output)) {
         output <- 'HiCReports.html'
     }
+    if (file.exists(output)) {
+        if (interactive()) {
+            qtxt <- sprintf(
+                "Output report %s already exists. \nOverwrite it? [Y/n]: ",
+                output
+            )
+            repeat {
+                cat(qtxt)
+                answer <- readLines(n = 1)
+                if (answer %in% c("y", "Y", "n", "N")) break
+            }
+            tolower(answer)
+            if ("n" == answer)
+                stop("Aborting report computing now.")
+        }
+        file.remove(output)
+    }
 
     ## --- Generate report
     tmpdir <- tempdir()
     tmpRmd <- file.path(tmpdir, basename(gsub('.html$', '.Rmd', output)))
     tmpHtml <- file.path(tmpdir, basename(output))
-    unlink(tmpRmd)
-    unlink(tmpHtml)
-    unlink(output)
+    if (file.exists(tmpHtml)) file.remove(tmpHtml)
+    if (file.exists(output)) file.remove(output)
     file.copy(
         system.file('templates', 'HiCoolFile_reports_template.Rmd', package = 'HiCool'), 
         tmpRmd
@@ -117,8 +148,8 @@ HiCReports <- function(hash, directory = '.', logs = NULL, output = NULL) {
     rmarkdown::render(tmpRmd, quiet = TRUE)
     writeLines(gsub("&amp;quot;", '"', readLines(tmpHtml)), tmpHtml)
     file.copy(tmpHtml, output)
-    unlink(tmpRmd)
-    unlink(tmpHtml)
+    if (file.exists(tmpRmd)) file.remove(tmpRmd)
+    if (file.exists(tmpHtml)) file.remove(tmpHtml)
     message("Report generated and available @ ", output)
     TRUE
 }

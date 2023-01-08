@@ -212,7 +212,7 @@ if (requireNamespace("HiContacts", quietly = TRUE)) {
             )
         )
 
-    cistrans <- cisTransRatio(hic)
+    cistrans <- HiContacts::cisTransRatio(hic)
     fig_cistrans <- plotly::plot_ly(
         cistrans, 
         x = ~chr, y = ~cis_pct*100, 

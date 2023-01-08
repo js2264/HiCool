@@ -12,11 +12,12 @@ HiCool(
   restriction = "DpnII,HinfI",
   iterative = TRUE,
   filter = TRUE,
+  balancing_args = " --cis-only --min-nnz 3 --mad-max 7 ",
   threads = 1L,
-  output = "HiCool",
   exclude_chr = "Mito|chrM|MT",
+  output = "HiCool",
   keep_bam = FALSE,
-  build_report = FALSE,
+  build_report = TRUE,
   scratch = tempdir()
 )
 }
@@ -28,7 +29,9 @@ HiCool(
 \item{genome}{Genome used to map the reads on, provided either
 as a fasta file (in which case the bowtie2 index will be automatically
 generated), or as a prefix to a bowtie2 index (e.g. \code{mm10} for
-\code{mm10.*.bt2} files)}
+\code{mm10.*.bt2} files). Genome can also be a unique ID for the following
+references: \code{hg38}, \code{mm10}, \code{dm6}, \code{R64-1-1}, \code{GRZc10}, \code{WBcel235},
+\code{Galgal4}.}
 
 \item{resolutions}{Resolutions used to bin the final mcool file
 (Default: "1000,2000,4000,8000,16000")}
@@ -41,17 +44,20 @@ generated), or as a prefix to a bowtie2 index (e.g. \code{mm10} for
 \item{filter}{Should read pairs be filtered (using filtering approach
 described in Cournac et al., BMC Genomics 2012)? (Default: TRUE)}
 
-\item{threads}{Number of CPUs used for parallelization. (Default: 16)}
+\item{balancing_args}{Balancing arguments for cooler (Default:
+" --cis-only --min-nnz 3 --mad-max 7 ")}
 
-\item{output}{Path to output directory where processed files will
-be created. (Default: \code{./HiCool})}
+\item{threads}{Number of CPUs used for parallelization. (Default: 1)}
 
 \item{exclude_chr}{Chromosomes excluded from the final .mcool file. This will
 not affect the pairs file. (Default: "Mito|chrM|MT")}
 
+\item{output}{Path to output directory where processed files will
+be created. (Default: \code{./HiCool})}
+
 \item{keep_bam}{Should the bam files be kept? (Default: FALSE)}
 
-\item{build_report}{Should an automated report be computed? (Default: FALSE)}
+\item{build_report}{Should an automated report be computed? (Default: TRUE)}
 
 \item{scratch}{Path to temporary directory where processing will take place.
 (Default: \code{tempdir()})}
@@ -72,18 +78,8 @@ by performing the following steps:
 }
 }
 \examples{
-## -------- Get fasta file from AnnotationHub
-ah <- AnnotationHub::AnnotationHub()
-twobit <- ah[['AH106801']]
-on.exit(unlink('seq.fa'))
-BiocIO::export(BiocIO::import(twobit), con = 'seq.fa', format = 'fasta')
-
-## -------- Get fastq files from HiContactsData
-r1 <- HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'r1_fastq')
-r2 <- HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'r2_fastq')
-
-## -------- Run HiCool::HiCool()
-on.exit(unlink('./HiCool/'), add = TRUE)
-hcf <- HiCool(r1, r2, 'seq.fa', output = './HiCool/')
+r1 <- HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'fastq_R1')
+r2 <- HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'fastq_R2')
+hcf <- HiCool(r1, r2, genome = 'R64-1-1', output = './HiCool/')
 hcf
 }
