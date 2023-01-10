@@ -1,6 +1,6 @@
 Package: HiCool
 Version: 0.99.0
-Date: 2022-11-04s
+Date: 2022-11-04
 Title: HiCool
 Authors@R:
     person("Jacques", "Serizay", email="jacquesserizay@gmail.com",
