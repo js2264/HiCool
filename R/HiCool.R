@@ -227,22 +227,6 @@ HiCool <- function(
         first_res <- as.integer(gsub(',.*', '', resolutions))
     }
 
-    #################################################
-    ## -------- Rebin with hicstuff rebin -------- ##
-    #################################################
-
-    message("HiCool :: Binning chimeric fragments...")
-    hs$commands$Rebin(
-        command_args = paste0(
-            " --binning ", paste0(first_res/1000, 'kb'), 
-            " --frags ", frags, 
-            " --chroms ", chroms,
-            " --force ", 
-            contact_map, ' ', rebinned_prefix 
-        ),
-        global_args = ""
-    )$execute() |> reticulate::py_capture_output() |> write(sinked_log, append = TRUE)
-    
     ############################################################
     ## -------- Exclude unwanted chr. from cool file -------- ##
     ############################################################
@@ -254,46 +238,36 @@ HiCool <- function(
         chr <- grep(exclude_chr, chr, invert = TRUE, value = TRUE)
         chr <- grep('contig', chr, invert = TRUE, value = TRUE)
         writeLines(chr, filtered_chroms)
-        cooler$cli$dump$dump$callback(
-            contact_map_rebinned, 
-            table = "pixels", 
-            columns = NULL, 
-            header = FALSE, 
-            na_rep = "", 
-            float_format = 'g', 
-            range = NULL, 
-            range2 = NULL, 
-            matrix = FALSE, 
-            balanced = FALSE, 
-            join = TRUE, 
-            annotate = NULL, 
-            one_based_ids = FALSE, 
-            one_based_starts = FALSE, 
-            chunksize = NULL, 
-            out = paste0(contact_map_filtered, '_tmp')
-        ) |> reticulate::py_capture_output() |> write(sinked_log, append = TRUE)
-        cooler$cli$load$load$callback(
-            bins_path = paste0(
-                filtered_chroms, ":", first_res
-            ), 
-            pixels_path = paste0(contact_map_filtered, '_tmp'), 
-            cool_path = contact_map_filtered, 
-            format = 'bg2', 
-            metadata = NULL, 
-            assembly = NULL, 
-            chunksize = 20e6L, 
-            field = "", 
-            count_as_float = FALSE, 
-            one_based = FALSE, 
-            comment_char = "#", 
-            input_copy_status = NULL, 
-            no_symmetric_upper = FALSE, 
-            storage_options = NULL
-        ) |> reticulate::py_capture_output() |> write(sinked_log, append = TRUE)
     }
     else {
-        file.copy(contact_map_rebinned, contact_map_filtered)
+        file.copy(file.path(tmp_folder, paste0(prefix, '.chr.tsv')), filtered_chroms)
     }
+
+    ############################################################
+    ## --------------- Parse pairs into cool ---------------- ##
+    ############################################################
+
+    cooler$cli$cload$pairs$callback(
+        bins = paste0(filtered_chroms, ":", first_res), 
+        pairs_path = file.path(tmp_folder, 'tmp',  paste0(prefix, '.valid_idx_pcrfree.pairs')), 
+        cool_path = contact_map_filtered, 
+        metadata = NULL, 
+        assembly = NULL, 
+        chunksize = 20e6L, 
+        zero_based = TRUE, 
+        comment_char = "#", 
+        input_copy_status = NULL, 
+        no_symmetric_upper = FALSE, 
+        field = "", 
+        temp_dir = file.path(tmp_folder, 'tmp'), 
+        no_delete_temp = FALSE, 
+        max_merge = 200L, 
+        storage_options = NULL, 
+        chrom1 = 2L, 
+        pos1 = 3L, 
+        chrom2 = 4L, 
+        pos2 = 5L 
+    ) |> reticulate::py_capture_output() |> write(sinked_log, append = TRUE)
 
     ########################################################################
     ## -------- Generate a multi-resolution, balanced mcool file -------- ##

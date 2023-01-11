@@ -260,6 +260,14 @@ if (requireNamespace("HiContacts", quietly = TRUE)) {
 }
 ```
 
+## Log file content 
+
+```{r}
+l <- readLines(file_log) 
+grep(':: INFO :: variance is', l, invert = TRUE, value = TRUE) |>   
+    writeLines()
+```
+
 ## Session information
 
 > System
