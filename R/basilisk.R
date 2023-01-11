@@ -11,6 +11,6 @@ env_HiCool <- basilisk::BasiliskEnvironment(
     "env", 
     pkgname = "HiCool",
     packages = .HiCool_dependencies, 
-    pip = c("hicstuff==3.1.5", "cooler==0.8.11", "serpentine==0.1.3"),
+    pip = c("hicstuff==3.1.5", "cooler==0.8.11"),
     channels = c("bioconda", "conda-forge")
 )

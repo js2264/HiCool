@@ -32,5 +32,4 @@ pairs_path <- HiContactsData::HiContactsData('yeast_wt', 'pairs.gz')
 log_path <- HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'HiCool_log')
 cf <- CoolFile(mcool_path, pairs = pairs_path, metadata = list(log = log_path))
 HiCReport(cf)
-HiCReports(logs = c(log_path))
 }

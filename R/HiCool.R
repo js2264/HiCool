@@ -9,8 +9,8 @@
 #' 
 #' 1. Automatically setting up an appropriate conda environment using basilisk;  
 #' 2. Mapping the reads to the provided genome reference using hicstuff;  
-#' 3. Binning the mapped fragments into a cool file at a chosen resolution;  
-#' 4. Filtering the resulting cool file to remove unwanted chromosomes (e.g. chrM);  
+#' 4. Filtering the resulting pairs file to remove unwanted chromosomes (e.g. chrM);  
+#' 3. Binning the filtered pairs into a cool file at a chosen resolution;  
 #' 5. Generating a multi-resolution mcool file;  
 #' 6. Normalizing matrices at each resolution by iterative corretion using cooler.
 #' 
@@ -61,8 +61,8 @@ HiCool <- function(
     r1, 
     r2, 
     genome, 
-    resolutions = NULL, 
     restriction = 'DpnII,HinfI', 
+    resolutions = NULL, 
     iterative = TRUE, 
     filter = TRUE, 
     balancing_args = " --cis-only --min-nnz 3 --mad-max 7 ", 

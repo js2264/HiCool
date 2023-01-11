@@ -8,8 +8,8 @@ HiCool(
   r1,
   r2,
   genome,
-  resolutions = NULL,
   restriction = "DpnII,HinfI",
+  resolutions = NULL,
   iterative = TRUE,
   filter = TRUE,
   balancing_args = " --cis-only --min-nnz 3 --mad-max 7 ",
@@ -33,10 +33,10 @@ generated), or as a prefix to a bowtie2 index (e.g. \code{mm10} for
 references: \code{hg38}, \code{mm10}, \code{dm6}, \code{R64-1-1}, \code{GRZc10}, \code{WBcel235},
 \code{Galgal4}.}
 
+\item{restriction}{Restriction enzyme(s) used in HiC (Default: "DpnII,HinfI")}
+
 \item{resolutions}{Resolutions used to bin the final mcool file
 (Default: "1000,2000,4000,8000,16000")}
-
-\item{restriction}{Restriction enzyme(s) used in HiC (Default: "DpnII,HinfI")}
 
 \item{iterative}{Should the read mapping be performed iteratively?
 (Default: TRUE)}
@@ -71,8 +71,8 @@ by performing the following steps:
 \enumerate{
 \item Automatically setting up an appropriate conda environment using basilisk;
 \item Mapping the reads to the provided genome reference using hicstuff;
-\item Binning the mapped fragments into a cool file at a chosen resolution;
-\item Filtering the resulting cool file to remove unwanted chromosomes (e.g. chrM);
+\item Filtering the resulting pairs file to remove unwanted chromosomes (e.g. chrM);
+\item Binning the filtered pairs into a cool file at a chosen resolution;
 \item Generating a multi-resolution mcool file;
 \item Normalizing matrices at each resolution by iterative corretion using cooler.
 }
