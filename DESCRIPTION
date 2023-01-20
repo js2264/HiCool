@@ -21,6 +21,10 @@ Depends:
 Imports:
     BiocIO,
     S4Vectors,
+    GenomicRanges, 
+    IRanges, 
+    InteractionSet, 
+    vroom, 
     basilisk,
     reticulate,
     rmarkdown,
