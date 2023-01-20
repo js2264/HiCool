@@ -1,3 +1,4 @@
+#' @rdname HiCool
 #' @export
 
 importHiCoolFolder <- function(output, hash, resolution = NULL) {
@@ -33,6 +34,7 @@ importHiCoolFolder <- function(output, hash, resolution = NULL) {
     return(x)
 }
 
+#' @rdname HiCool
 #' @export
 
 getHiCoolArgs <- function(log) {
@@ -58,6 +60,7 @@ getHiCoolArgs <- function(log) {
     return(args)
 }
 
+#' @rdname HiCool
 #' @export
 
 getHicStats <- function(log) {

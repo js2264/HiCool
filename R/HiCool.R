@@ -59,27 +59,6 @@
 #' 
 #' @return A `CoolFile` object with prefilled `pairsFile` and `metadata` slots.
 #' 
-#' @usage 
-#' HiCool(
-#'   r1, 
-#'   r2,
-#'   genome, 
-#'   restriction = "DpnII,HinfI", 
-#'   resolutions = NULL, 
-#'   iterative = TRUE, 
-#'   filter = TRUE, 
-#'   balancing_args = " --cis-only --min-nnz 3 --mad-max 7 ", 
-#'   threads = 1L, 
-#'   exclude_chr = "Mito|chrM|MT", 
-#'   output = "HiCool",
-#'   keep_bam = FALSE,  
-#'   build_report = TRUE, 
-#'   scratch = tempdir()
-#' )
-#' importHiCoolFolder(output, hash, resolution)
-#' getHiCoolArgs(log)
-#' getHicStats(log)
-#' 
 #' @importClassesFrom HiCExperiment CoolFile
 #' @import HiCExperiment
 #' @importFrom HiCExperiment CoolFile
@@ -100,6 +79,7 @@
 #' readLines(S4Vectors::metadata(hcf)$log)
 NULL
 
+#' @rdname HiCool
 #' @export 
 
 HiCool <- function(
