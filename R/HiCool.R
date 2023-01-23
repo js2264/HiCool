@@ -265,7 +265,9 @@ HiCool <- function(
         writeLines(chr, filtered_chroms)
     }
     else {
-        file.copy(file.path(tmp_folder, paste0(prefix, '.chr.tsv')), filtered_chroms)
+        chr <- readLines(file.path(tmp_folder, paste0(prefix, '.chr.tsv'))) 
+        chr <- grep('contig', chr, invert = TRUE, value = TRUE)
+        writeLines(chr, filtered_chroms)
     }
 
     ############################################################
