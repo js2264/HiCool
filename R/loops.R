@@ -22,7 +22,7 @@
 #' storing significant interactions identified by chromosight, and an additional 
 #' `chromosight_args` metadata entry.
 #'
-#' @importFrom GenomicRanges GenomicRanges
+#' @importFrom GenomicRanges GRanges
 #' @importFrom vroom vroom
 #' @importFrom InteractionSet GInteractions
 #' @importFrom IRanges IRanges
