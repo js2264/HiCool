@@ -259,7 +259,7 @@ HiCool <- function(
 
     excludable_chrs <- grep(exclude_chr, chrs$contig, value = TRUE)
     if (length(excludable_chrs)) {
-        message("HiCool :: Remove unwanted chromosomes...")
+        message("HiCool :: Removing unwanted chromosomes...")
         chr <- readLines(file.path(tmp_folder, paste0(prefix, '.chr.tsv'))) 
         chr <- grep(exclude_chr, chr, invert = TRUE, value = TRUE)
         chr <- grep('contig', chr, invert = TRUE, value = TRUE)
@@ -275,6 +275,7 @@ HiCool <- function(
     ## --------------- Parse pairs into cool ---------------- ##
     ############################################################
 
+    message("HiCool :: Parsing pairs into .cool file...")
     cooler$cli$cload$pairs$callback(
         bins = paste0(filtered_chroms, ":", first_res), 
         pairs_path = file.path(tmp_folder, 'tmp',  paste0(prefix, '.valid_idx_pcrfree.pairs')), 
@@ -291,6 +292,7 @@ HiCool <- function(
         no_delete_temp = FALSE, 
         max_merge = 200L, 
         storage_options = NULL, 
+        append = FALSE, 
         chrom1 = 2L, 
         pos1 = 3L, 
         chrom2 = 4L, 
