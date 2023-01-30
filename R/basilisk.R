@@ -1,8 +1,10 @@
 .HiCool_dependencies <- c(
-    "python==3.9.1", 
-    "numpy==1.23.4", 
-    "bowtie2==2.4.5", 
-    "samtools==1.7"
+    "python==3.7.12", 
+    "bowtie2==2.5.0", 
+    "samtools==1.16.1", 
+    "hicstuff==3.1.5", 
+    "chromosight==1.6.3", 
+    "cooler==0.9.1"
 )
 
 #' @importFrom basilisk BasiliskEnvironment
@@ -11,6 +13,5 @@ env_HiCool <- basilisk::BasiliskEnvironment(
     "env", 
     pkgname = "HiCool",
     packages = .HiCool_dependencies, 
-    pip = c("hicstuff==3.1.5", "cooler==0.8.11", "chromosight==1.6.3"),
-    channels = c("bioconda", "conda-forge")
+    channels = c("conda-forge", "bioconda")
 )
