@@ -106,7 +106,6 @@ HiCool <- function(
 
     proc <- basilisk::basiliskStart(env_HiCool)
     on.exit(basilisk::basiliskStop(proc))
-    on.exit(unlink(scratch), add = TRUE)
     hash <- basilisk::basiliskRun(
         env = env_HiCool, 
         fun = .processFastq,
@@ -181,6 +180,7 @@ HiCool <- function(
     contact_map_mcool <- file.path(tmp_folder, paste0(prefix, '_res0.mcool'))
     sinked_log <- file.path(tmp_folder, paste0(prefix, '.Rlog'))
     dir.create(tmp_folder, showWarnings = FALSE, recursive = TRUE)
+    on.exit(unlink(tmp_folder))
 
     ###############################################
     ## -------- Map reads with hicstuff -------- ##
@@ -196,7 +196,8 @@ HiCool <- function(
         force = TRUE, 
         mapping = ifelse(iterative, "iterative", "normal"),
         mat_fmt = "cool",
-        # mat_fmt = "graal",
+        min_qual = 10,
+        min_size = 0,
         no_cleanup = TRUE,
         out_dir = tmp_folder, 
         pcr_duplicates = TRUE, 
