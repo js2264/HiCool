@@ -90,7 +90,7 @@ HiCool <- function(
     resolutions = NULL, 
     iterative = TRUE, 
     filter = TRUE, 
-    balancing_args = " --cis-only --min-nnz 3 --mad-max 7 ", 
+    balancing_args = " --min-nnz 10 --mad-max 5 ", #" --cis-only --min-nnz 3 --mad-max 7 "
     threads = 1L, 
     exclude_chr = 'Mito|chrM|MT', 
     output = 'HiCool', 
