@@ -10,11 +10,13 @@
 #' by performing the following steps: 
 #' 
 #' 1. Automatically setting up an appropriate conda environment using basilisk;  
-#' 2. Mapping the reads to the provided genome reference using hicstuff;  
+#' 2. Mapping the reads to the provided genome reference using `hicstuff` and filtering of irrelevant pairs;  
 #' 4. Filtering the resulting pairs file to remove unwanted chromosomes (e.g. chrM);  
 #' 3. Binning the filtered pairs into a cool file at a chosen resolution;  
 #' 5. Generating a multi-resolution mcool file;  
 #' 6. Normalizing matrices at each resolution by iterative corretion using cooler.
+#' 
+#' The filtering strategy used by `hicstuff` is described in Cournac et al., BMC Genomics 2012. 
 #' 
 #' @section HiCool utils:
 #' - `importHiCoolFolder(folder, hash)` automatically finds the different processed files 
@@ -35,14 +37,14 @@
 #'   references: `hg38`, `mm10`, `dm6`, `R64-1-1`, `GRZc10`, `WBcel235`, 
 #'   `Galgal4`.
 #' @param resolutions Resolutions used to bin the final mcool file 
-#'   (Default: "1000,2000,4000,8000,16000")
+#'   (Default: 5 levels of resolution automatically inferred according to genome size)
 #' @param restriction Restriction enzyme(s) used in HiC (Default: "DpnII,HinfI")
 #' @param iterative Should the read mapping be performed iteratively? 
 #'   (Default: TRUE)
-#' @param filter Should read pairs be filtered (using filtering approach 
-#'   described in Cournac et al., BMC Genomics 2012)? (Default: TRUE)
-#' @param balancing_args Balancing arguments for cooler (Default: 
-#' " --cis-only --min-nnz 3 --mad-max 7 ")
+#' @param balancing_args Balancing arguments for cooler. 
+#' See `cooler` documentation [here](https://cooler.readthedocs.io/en/latest/cli.html#cooler-balance)
+#' for a list of all available balancing arguments. 
+#' These defaults match those used by the 4DN consortium. 
 #' @param threads Number of CPUs used for parallelization. (Default: 1)
 #' @param exclude_chr Chromosomes excluded from the final .mcool file. This will 
 #'   not affect the pairs file. (Default: "Mito|chrM|MT")
@@ -89,8 +91,7 @@ HiCool <- function(
     restriction = 'DpnII,HinfI', 
     resolutions = NULL, 
     iterative = TRUE, 
-    filter = TRUE, 
-    balancing_args = " --min-nnz 10 --mad-max 5 ", #" --cis-only --min-nnz 3 --mad-max 7 "
+    balancing_args = " --min-nnz 10 --mad-max 5 ", 
     threads = 1L, 
     exclude_chr = 'Mito|chrM|MT', 
     output = 'HiCool', 
@@ -115,7 +116,6 @@ HiCool <- function(
         resolutions = resolutions, 
         restriction = restriction, 
         iterative = iterative, 
-        filter = filter, 
         balancing_args = balancing_args, 
         threads = as.integer(threads), 
         output = output, 
@@ -142,7 +142,6 @@ HiCool <- function(
     resolutions, 
     restriction, 
     iterative, 
-    filter, 
     balancing_args, 
     threads, 
     output, 
@@ -192,7 +191,7 @@ HiCool <- function(
         input2 = r2, 
         genome = genome, 
         enzyme = restriction, 
-        filter_events = filter, 
+        filter_events = TRUE, 
         force = TRUE, 
         mapping = ifelse(iterative, "iterative", "normal"),
         mat_fmt = "cool",
@@ -215,7 +214,6 @@ HiCool <- function(
         paste0("HiCool argument ::: resolutions: ", resolutions),
         paste0("HiCool argument ::: restriction: ", restriction),
         paste0("HiCool argument ::: iterative: ", iterative),
-        paste0("HiCool argument ::: filter: ", filter),
         paste0("HiCool argument ::: balancing_args: ", balancing_args),
         paste0("HiCool argument ::: threads: ", threads),
         paste0("HiCool argument ::: output: ", output),
@@ -247,10 +245,10 @@ HiCool <- function(
         )))
         first_res <- list_resolutions[[resolutions_idx]][1]
         message("HiCool :: Best-suited minimum resolution automatically inferred: ", first_res)
-        resolutions <- paste(list_resolutions[[resolutions_idx]], collapse = ',')
+        resolutions <- list_resolutions[[resolutions_idx]]
     }
     else {
-        first_res <- as.integer(gsub(',.*', '', resolutions))
+        first_res <- resolutions[[1]]
     }
 
     ############################################################
@@ -307,7 +305,7 @@ HiCool <- function(
     cooler$zoomify_cooler(
         base_uris = contact_map_filtered, 
         outfile = contact_map_mcool, 
-        resolutions = strsplit(resolutions, ',')[[1]] |> as.integer(), 
+        resolutions = as.integer(resolutions), 
         chunksize = 10000000L, 
         nproc = threads, 
         columns = NULL, 
@@ -317,7 +315,7 @@ HiCool <- function(
     message("HiCool :: Balancing .mcool file...")
     cooler$cli$zoomify$invoke_balance(
         args = paste0("--nproc ", threads, balancing_args), 
-        resolutions = strsplit(resolutions, ',')[[1]] |> as.integer(), 
+        resolutions = as.integer(resolutions), 
         outfile = contact_map_mcool  
     ) |> reticulate::py_capture_output() |> write(sinked_log, append = TRUE)
 

@@ -14,8 +14,7 @@ HiCool(
   restriction = "DpnII,HinfI",
   resolutions = NULL,
   iterative = TRUE,
-  filter = TRUE,
-  balancing_args = " --cis-only --min-nnz 3 --mad-max 7 ",
+  balancing_args = " --min-nnz 10 --mad-max 5 ",
   threads = 1L,
   exclude_chr = "Mito|chrM|MT",
   output = "HiCool",
@@ -45,16 +44,15 @@ references: \code{hg38}, \code{mm10}, \code{dm6}, \code{R64-1-1}, \code{GRZc10},
 \item{restriction}{Restriction enzyme(s) used in HiC (Default: "DpnII,HinfI")}
 
 \item{resolutions}{Resolutions used to bin the final mcool file
-(Default: "1000,2000,4000,8000,16000")}
+(Default: 5 levels of resolution automatically inferred according to genome size)}
 
 \item{iterative}{Should the read mapping be performed iteratively?
 (Default: TRUE)}
 
-\item{filter}{Should read pairs be filtered (using filtering approach
-described in Cournac et al., BMC Genomics 2012)? (Default: TRUE)}
-
-\item{balancing_args}{Balancing arguments for cooler (Default:
-" --cis-only --min-nnz 3 --mad-max 7 ")}
+\item{balancing_args}{Balancing arguments for cooler.
+See \code{cooler} documentation \href{https://cooler.readthedocs.io/en/latest/cli.html#cooler-balance}{here}
+for a list of all available balancing arguments.
+These defaults match those used by the 4DN consortium.}
 
 \item{threads}{Number of CPUs used for parallelization. (Default: 1)}
 
@@ -85,12 +83,14 @@ A \code{CoolFile} object with prefilled \code{pairsFile} and \code{metadata} slo
 by performing the following steps:
 \enumerate{
 \item Automatically setting up an appropriate conda environment using basilisk;
-\item Mapping the reads to the provided genome reference using hicstuff;
+\item Mapping the reads to the provided genome reference using \code{hicstuff} and filtering of irrelevant pairs;
 \item Filtering the resulting pairs file to remove unwanted chromosomes (e.g. chrM);
 \item Binning the filtered pairs into a cool file at a chosen resolution;
 \item Generating a multi-resolution mcool file;
 \item Normalizing matrices at each resolution by iterative corretion using cooler.
 }
+
+The filtering strategy used by \code{hicstuff} is described in Cournac et al., BMC Genomics 2012.
 }
 \section{HiCool utils}{
 
