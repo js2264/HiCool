@@ -1,6 +1,5 @@
 [![](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
 [![](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![rworkflows](https://github.com/js2264/HiCool/actions/workflows/rworkflows.yml/badge.svg)](https://github.com/js2264/HiCool/actions/workflows/rworkflows.yml)
 
 # HiCool
 
