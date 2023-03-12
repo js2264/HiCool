@@ -76,9 +76,9 @@
 #' r2 <- HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'fastq_R2')
 #' hcf <- HiCool(r1, r2, genome = 'R64-1-1', output = './HiCool/')
 #' hcf
-#' getHiCoolArgs(S4Vectors::metadata(hcf)$log)
-#' getHicStats(S4Vectors::metadata(hcf)$log)
-#' readLines(S4Vectors::metadata(hcf)$log)
+#' getHiCoolArgs(metadata(hcf)$log)
+#' getHicStats(metadata(hcf)$log)
+#' readLines(metadata(hcf)$log)
 NULL
 
 #' @rdname HiCool

@@ -39,8 +39,10 @@ Suggests:
     HiContactsData, 
     AnnotationHub,
     BiocFileCache,  
+    BiocStyle,
     testthat,
-    knitr
+    knitr,
+    rmarkdown
 biocViews:
     HiC,
     DNA3DStructure, 

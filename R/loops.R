@@ -30,7 +30,7 @@
 #' @examples 
 #' contacts_yeast <- contacts_yeast()
 #' contacts_yeast <- getLoops(contacts_yeast)
-#' S4Vectors::metadata(contacts_yeast)$chromosight_args
+#' metadata(contacts_yeast)$chromosight_args
 #' topologicalFeatures(contacts_yeast, 'loops')
 
 getLoops <- function(

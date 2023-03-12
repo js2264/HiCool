@@ -5,3 +5,4 @@ tmp/
 seq.fa
 hcf.rds
 *pdf
+.basilisk.R
