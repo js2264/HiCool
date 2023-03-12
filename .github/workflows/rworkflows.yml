@@ -32,11 +32,11 @@ jobs:
         #   r: auto
         #   cont: ~
         #   rspm: ~
-        - os: windows-latest
-          bioc: devel
-          r: auto
-          cont: ~
-          rspm: ~
+        # - os: windows-latest
+        #   bioc: devel
+        #   r: auto
+        #   cont: ~
+        #   rspm: ~
     steps:
     - uses: neurogenomics/rworkflows@master
       with:
