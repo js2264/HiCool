@@ -1,0 +1,40 @@
+HiCool working directory ::: /__w/HiCool/HiCool/docs/reference
+HiCool argument ::: r1: /github/home/.cache/R/ExperimentHub/60a51e7d88f_7833
+HiCool argument ::: r2: /github/home/.cache/R/ExperimentHub/60afb638dc_7834
+HiCool argument ::: genome: /tmp/RtmpTYYiES/R64-1-1
+HiCool argument ::: resolutions: 
+HiCool argument ::: restriction: DpnII,HinfI
+HiCool argument ::: iterative: TRUE
+HiCool argument ::: balancing_args:  --min-nnz 10 --mad-max 5 
+HiCool argument ::: threads: 1
+HiCool argument ::: output: ./HiCool/
+HiCool argument ::: exclude_chr: Mito|chrM|MT
+HiCool argument ::: keep_bam: FALSE
+HiCool argument ::: scratch: /tmp/RtmpTYYiES
+----------------
+## hicstuff: v3.1.5 log file
+## date: 2023-04-04 13:24:38
+## enzyme: DpnII,HinfI
+## input1: /github/home/.cache/R/ExperimentHub/60a51e7d88f_7833 
+## input2: /github/home/.cache/R/ExperimentHub/60afb638dc_7834
+## ref: /tmp/RtmpTYYiES/R64-1-1
+---
+2023-04-04,13:24:41 :: INFO :: 100000 reads to parse
+2023-04-04,13:24:41 :: INFO :: Truncating unaligned reads to 20bp and mapping.
+2023-04-04,13:24:44 :: INFO :: 19256 reads left to map.
+2023-04-04,13:24:44 :: INFO :: Trying to map unaligned reads at full length (35bp).
+2023-04-04,13:24:45 :: INFO :: 18387 reads left to map.
+2023-04-04,13:24:46 :: INFO :: 81613 reads aligned / 100000 total reads.
+2023-04-04,13:24:46 :: INFO :: 100000 reads to parse
+2023-04-04,13:24:46 :: INFO :: Truncating unaligned reads to 20bp and mapping.
+2023-04-04,13:24:50 :: INFO :: 20617 reads left to map.
+2023-04-04,13:24:50 :: INFO :: Trying to map unaligned reads at full length (35bp).
+2023-04-04,13:24:51 :: INFO :: 19373 reads left to map.
+2023-04-04,13:24:51 :: INFO :: 80627 reads aligned / 100000 total reads.
+2023-04-04,13:24:56 :: INFO :: 81% reads (single ends) mapped with Q >= 10.0 (162240/200000)
+2023-04-04,13:24:59 :: INFO :: Filtering with thresholds: uncuts=7 loops=7
+2023-04-04,13:25:00 :: INFO :: Proportion of inter contacts: 22.03% (intra: 48089, inter: 13589)
+2023-04-04,13:25:00 :: INFO :: 12315 pairs discarded: Loops: 2205, Uncuts: 10027, Weirds: 83
+2023-04-04,13:25:00 :: INFO :: 61678 pairs kept (83.36%)
+2023-04-04,13:25:03 :: INFO :: 1% PCR duplicates have been filtered out (719 / 61678 pairs) 
+2023-04-04,13:25:05 :: INFO :: Contact map generated after 0h 0m 27s
