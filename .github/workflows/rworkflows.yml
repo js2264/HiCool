@@ -27,7 +27,7 @@ jobs:
         - os: ubuntu-latest
           bioc: devel
           r: auto
-          cont: bioconductor/bioconductor_docker:devel
+          cont: bioconductor/bioconductor:devel
           rspm: https://packagemanager.rstudio.com/cran/__linux__/focal/release
         # - os: macOS-latest
         #   bioc: devel
@@ -52,7 +52,7 @@ jobs:
         has_runit: ${{ false }}
         has_latex: ${{ false }}
         GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
-        run_docker: ${{ true }}
+        run_docker: ${{ false }}
         docker_user: ${{ 'js2264' }}
         docker_org: ${{ 'js2264' }}
         DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
