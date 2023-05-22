@@ -27,7 +27,7 @@ The filtering strategy used by hicstuff is described in Cournac et al., BMC Geno
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">HiCool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.6</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
       </span>
     </div>
 
@@ -194,16 +194,14 @@ thresholds, etc.</p></li>
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">r1</span> <span class="op">&lt;-</span> <span class="fu">HiContactsData</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/HiContactsData/man/HiContactsData.html" class="external-link">HiContactsData</a></span><span class="op">(</span>sample <span class="op">=</span> <span class="st">'yeast_wt'</span>, format <span class="op">=</span> <span class="st">'fastq_R1'</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> snapshotDate(): 2023-04-04</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> see ?HiContactsData and browseVignettes('HiContactsData') for documentation</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> loading from cache</span>
 <span class="r-in"><span><span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu">HiContactsData</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/HiContactsData/man/HiContactsData.html" class="external-link">HiContactsData</a></span><span class="op">(</span>sample <span class="op">=</span> <span class="st">'yeast_wt'</span>, format <span class="op">=</span> <span class="st">'fastq_R2'</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> snapshotDate(): 2023-04-04</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> see ?HiContactsData and browseVignettes('HiContactsData') for documentation</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> loading from cache</span>
 <span class="r-in"><span><span class="va">hcf</span> <span class="op">&lt;-</span> <span class="fu">HiCool</span><span class="op">(</span><span class="va">r1</span>, <span class="va">r2</span>, genome <span class="op">=</span> <span class="st">'R64-1-1'</span>, output <span class="op">=</span> <span class="st">'./HiCool/'</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> HiCool :: Recovering bowtie2 genome index from AWS iGenomes...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> HiCool :: Initiating processing of fastq files [tmp folder: /tmp/RtmpTYYiES/4Y1CBZ]...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> HiCool :: Initiating processing of fastq files [tmp folder: /tmp/RtmpLG33tZ/DF8U6P]...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> HiCool :: Mapping fastq files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> HiCool :: Best-suited minimum resolution automatically inferred: 1000</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> HiCool :: Removing unwanted chromosomes...</span>
@@ -214,23 +212,23 @@ thresholds, etc.</p></li>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> HiCool :: .fastq to .mcool processing done!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> HiCool :: Check ./HiCool/folder to find the generated files</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> HiCool :: Generating HiCool report. This might take a while.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> HiCool :: Report generated and available @ /__w/HiCool/HiCool/docs/reference/HiCool/60a51e7d88f_7833^mapped-R64-1-1^4Y1CBZ.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> HiCool :: Report generated and available @ /__w/HiCool/HiCool/docs/reference/HiCool/1fe971273e9d_7833^mapped-R64-1-1^DF8U6P.html</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> HiCool :: All processing successfully achieved. Congrats!</span>
 <span class="r-in"><span><span class="va">hcf</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> CoolFile object</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> .mcool file: ./HiCool//matrices/60a51e7d88f_7833^mapped-R64-1-1^4Y1CBZ.mcool </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> .mcool file: ./HiCool//matrices/1fe971273e9d_7833^mapped-R64-1-1^DF8U6P.mcool </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> resolution: 1000 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> pairs file: ./HiCool//pairs/60a51e7d88f_7833^mapped-R64-1-1^4Y1CBZ.pairs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> pairs file: ./HiCool//pairs/1fe971273e9d_7833^mapped-R64-1-1^DF8U6P.pairs </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> metadata(3): log args stats</span>
 <span class="r-in"><span><span class="fu">getHiCoolArgs</span><span class="op">(</span><span class="fu">S4Vectors</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html" class="external-link">metadata</a></span><span class="op">(</span><span class="va">hcf</span><span class="op">)</span><span class="op">$</span><span class="va">log</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $r1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/github/home/.cache/R/ExperimentHub/60a51e7d88f_7833"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/github/home/.cache/R/ExperimentHub/1fe971273e9d_7833"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $r2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/github/home/.cache/R/ExperimentHub/60afb638dc_7834"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/github/home/.cache/R/ExperimentHub/1fe923fbe457_7834"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $genome</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpTYYiES/R64-1-1"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpLG33tZ/R64-1-1"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $resolutions</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] NA</span>
@@ -257,7 +255,7 @@ thresholds, etc.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $scratch</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpTYYiES"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpLG33tZ"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $wd</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/__w/HiCool/HiCool/docs/reference"</span>
@@ -295,9 +293,9 @@ thresholds, etc.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/readLines.html" class="external-link">readLines</a></span><span class="op">(</span><span class="fu">S4Vectors</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html" class="external-link">metadata</a></span><span class="op">(</span><span class="va">hcf</span><span class="op">)</span><span class="op">$</span><span class="va">log</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "HiCool working directory ::: /__w/HiCool/HiCool/docs/reference"                                  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2] "HiCool argument ::: r1: /github/home/.cache/R/ExperimentHub/60a51e7d88f_7833"                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "HiCool argument ::: r2: /github/home/.cache/R/ExperimentHub/60afb638dc_7834"                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4] "HiCool argument ::: genome: /tmp/RtmpTYYiES/R64-1-1"                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2] "HiCool argument ::: r1: /github/home/.cache/R/ExperimentHub/1fe971273e9d_7833"                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "HiCool argument ::: r2: /github/home/.cache/R/ExperimentHub/1fe923fbe457_7834"                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4] "HiCool argument ::: genome: /tmp/RtmpLG33tZ/R64-1-1"                                             </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "HiCool argument ::: resolutions: "                                                               </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [6] "HiCool argument ::: restriction: DpnII,HinfI"                                                    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "HiCool argument ::: iterative: TRUE"                                                             </span>
@@ -306,34 +304,34 @@ thresholds, etc.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [10] "HiCool argument ::: output: ./HiCool/"                                                           </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [11] "HiCool argument ::: exclude_chr: Mito|chrM|MT"                                                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [12] "HiCool argument ::: keep_bam: FALSE"                                                             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "HiCool argument ::: scratch: /tmp/RtmpTYYiES"                                                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "HiCool argument ::: scratch: /tmp/RtmpLG33tZ"                                                    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [14] "----------------"                                                                                </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [15] "## hicstuff: v3.1.5 log file"                                                                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [16] "## date: 2023-04-04 13:24:38"                                                                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [16] "## date: 2023-05-22 12:14:05"                                                                    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [17] "## enzyme: DpnII,HinfI"                                                                          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [18] "## input1: /github/home/.cache/R/ExperimentHub/60a51e7d88f_7833 "                                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [19] "## input2: /github/home/.cache/R/ExperimentHub/60afb638dc_7834"                                  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [20] "## ref: /tmp/RtmpTYYiES/R64-1-1"                                                                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [18] "## input1: /github/home/.cache/R/ExperimentHub/1fe971273e9d_7833 "                               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [19] "## input2: /github/home/.cache/R/ExperimentHub/1fe923fbe457_7834"                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [20] "## ref: /tmp/RtmpLG33tZ/R64-1-1"                                                                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [21] "---"                                                                                             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [22] "2023-04-04,13:24:41 :: INFO :: 100000 reads to parse"                                            </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [23] "2023-04-04,13:24:41 :: INFO :: Truncating unaligned reads to 20bp and mapping."                  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [24] "2023-04-04,13:24:44 :: INFO :: 19256 reads left to map."                                         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [25] "2023-04-04,13:24:44 :: INFO :: Trying to map unaligned reads at full length (35bp)."             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [26] "2023-04-04,13:24:45 :: INFO :: 18387 reads left to map."                                         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [27] "2023-04-04,13:24:46 :: INFO :: 81613 reads aligned / 100000 total reads."                        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [28] "2023-04-04,13:24:46 :: INFO :: 100000 reads to parse"                                            </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [29] "2023-04-04,13:24:46 :: INFO :: Truncating unaligned reads to 20bp and mapping."                  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [30] "2023-04-04,13:24:50 :: INFO :: 20617 reads left to map."                                         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [31] "2023-04-04,13:24:50 :: INFO :: Trying to map unaligned reads at full length (35bp)."             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [32] "2023-04-04,13:24:51 :: INFO :: 19373 reads left to map."                                         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [33] "2023-04-04,13:24:51 :: INFO :: 80627 reads aligned / 100000 total reads."                        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [34] "2023-04-04,13:24:56 :: INFO :: 81% reads (single ends) mapped with Q &gt;= 10.0 (162240/200000)"    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [35] "2023-04-04,13:24:59 :: INFO :: Filtering with thresholds: uncuts=7 loops=7"                      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [36] "2023-04-04,13:25:00 :: INFO :: Proportion of inter contacts: 22.03% (intra: 48089, inter: 13589)"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [37] "2023-04-04,13:25:00 :: INFO :: 12315 pairs discarded: Loops: 2205, Uncuts: 10027, Weirds: 83"    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [38] "2023-04-04,13:25:00 :: INFO :: 61678 pairs kept (83.36%)"                                        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [39] "2023-04-04,13:25:03 :: INFO :: 1% PCR duplicates have been filtered out (719 / 61678 pairs) "    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [40] "2023-04-04,13:25:05 :: INFO :: Contact map generated after 0h 0m 27s"                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [22] "2023-05-22,12:14:08 :: INFO :: 100000 reads to parse"                                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [23] "2023-05-22,12:14:08 :: INFO :: Truncating unaligned reads to 20bp and mapping."                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [24] "2023-05-22,12:14:11 :: INFO :: 19256 reads left to map."                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [25] "2023-05-22,12:14:11 :: INFO :: Trying to map unaligned reads at full length (35bp)."             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [26] "2023-05-22,12:14:12 :: INFO :: 18387 reads left to map."                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [27] "2023-05-22,12:14:12 :: INFO :: 81613 reads aligned / 100000 total reads."                        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [28] "2023-05-22,12:14:13 :: INFO :: 100000 reads to parse"                                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [29] "2023-05-22,12:14:13 :: INFO :: Truncating unaligned reads to 20bp and mapping."                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [30] "2023-05-22,12:14:16 :: INFO :: 20617 reads left to map."                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [31] "2023-05-22,12:14:16 :: INFO :: Trying to map unaligned reads at full length (35bp)."             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [32] "2023-05-22,12:14:16 :: INFO :: 19373 reads left to map."                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [33] "2023-05-22,12:14:17 :: INFO :: 80627 reads aligned / 100000 total reads."                        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [34] "2023-05-22,12:14:21 :: INFO :: 81% reads (single ends) mapped with Q &gt;= 10.0 (162240/200000)"    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [35] "2023-05-22,12:14:24 :: INFO :: Filtering with thresholds: uncuts=7 loops=7"                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [36] "2023-05-22,12:14:25 :: INFO :: Proportion of inter contacts: 22.03% (intra: 48089, inter: 13589)"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [37] "2023-05-22,12:14:25 :: INFO :: 12315 pairs discarded: Loops: 2205, Uncuts: 10027, Weirds: 83"    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [38] "2023-05-22,12:14:25 :: INFO :: 61678 pairs kept (83.36%)"                                        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [39] "2023-05-22,12:14:27 :: INFO :: 1% PCR duplicates have been filtered out (719 / 61678 pairs) "    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [40] "2023-05-22,12:14:29 :: INFO :: Contact map generated after 0h 0m 23s"                            </span>
 </code></pre></div>
     </div>
   </div>
