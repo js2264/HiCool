@@ -206,9 +206,7 @@ message(
     "R:\t\t\t\t", paste(
         version$major, version$minor, sep = '.'
     ), "(", R.home(), ")", '\n',
-    "Python:\t\t\t", basilisk::listPythonVersion(HiCool:::env_HiCool), "(", file.path(
-        basilisk::obtainEnvironmentPath(HiCool:::env_HiCool), 'bin', 'python'
-    ), ")", '\n',
+    "Python:\t\t\t", reticulate::py_version(), "(", reticulate::py_exe(), ")", '\n',
     "Bioconductor:\t", BiocManager::version(), '\n',
     "basilisk:\t\t", packageVersion('basilisk'), '\n',
     "HiCExperiment:\t", packageVersion('HiCExperiment'), '\n',
@@ -220,8 +218,13 @@ message(
 
 ```{r}
 message(
-    "samtools: \t", gsub('.*==', '', grep('samtools', HiCool:::.HiCool_dependencies, value = TRUE)), "\n",
-    "bowtie2: \t", gsub('.*==', '', grep('bowtie2', HiCool:::.HiCool_dependencies, value = TRUE)), "\n"
+    "hicstuff: \t", gsub('.*==', '', grep('hicstuff', HiCool:::HiCool_args$packages, value = TRUE)), "\n",
+    "chromosight: \t", gsub('.*==', '', grep('chromosight', HiCool:::HiCool_args$packages, value = TRUE)), "\n",
+    "cooler: \t", gsub('.*==', '', grep('cooler', HiCool:::HiCool_args$packages, value = TRUE)), "\n",
+    "pairtools: \t", gsub('.*==', '', grep('pairtools', HiCool:::HiCool_args$packages, value = TRUE)), "\n",
+    "numpy: \t", gsub('.*==', '', grep('numpy', HiCool:::HiCool_args$packages, value = TRUE)), "\n",
+    "samtools: \t", gsub('.*==', '', grep('samtools', HiCool:::HiCool_args$packages, value = TRUE)), "\n",
+    "bowtie2: \t", gsub('.*==', '', grep('bowtie2', HiCool:::HiCool_args$packages, value = TRUE)), "\n"
 )
 ```
 
@@ -234,13 +237,11 @@ sessioninfo::package_info()
 > Python environment
 
 ```{r}
-proc <- basilisk::basiliskStart(HiCool:::env_HiCool)
 sessioninfo::python_info()
-basilisk::basiliskStop(proc)
 ```
 
 > Python packages
 
 ```{r}
-basilisk::listPackages(HiCool:::env_HiCool)
+basilisk::listPackages(dirname(dirname(reticulate::py_exe())))
 ```

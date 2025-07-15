@@ -46,8 +46,12 @@ getLoops <- function(
     nreads = 'no', 
     ncores = 1L  
 ) {
-    proc <- basilisk::basiliskStart(env_HiCool)
-    on.exit(basilisk::basiliskStop(proc))
+    ###############################################
+    ## -------- Get path to python bins -------- ##
+    ###############################################
+    env_dir <- do.call(basilisk.utils::createEnvironment, HiCool_args)
+    reticulate::use_condaenv(env_dir, required = TRUE)
+    cs <- reticulate::import("chromosight")
     if (is.null(resolution)) resolution <- resolution(x)
     path <- paste0(fileName(x), '::/resolutions/', as.integer(resolution))
     dir.create(dirname(output_prefix), showWarnings = FALSE)
@@ -78,18 +82,13 @@ getLoops <- function(
         "--subsample" = nreads, 
         "--threads" = ncores 
     )
-    loops <- basilisk::basiliskRun(
-        env = env_HiCool, 
-        fun = .getLoops,
-        chromosight_args = args
-    )
+    loops <- .getLoops(args)
     topologicalFeatures(x, 'loops') <- loops
     metadata(x)[['chromosight_args']] <- args
     return(x)
 }
 
 .getLoops <- function(chromosight_args) {
-    cs <- reticulate::import("chromosight")
     cs$cli$chromosight$cmd_detect(chromosight_args)
     df <- vroom::vroom(paste0(chromosight_args[['<prefix>']], '.tsv'), show_col_types = FALSE)
     loops <- InteractionSet::GInteractions(

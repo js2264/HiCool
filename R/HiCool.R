@@ -36,8 +36,8 @@
 #'   `mm10.*.bt2` files). Genome can also be a unique ID for the following 
 #'   references: `hg38`, `mm10`, `dm6`, `R64-1-1`, `GRZc10`, `WBcel235`, 
 #'   `Galgal4`.
-#' @param resolutions Resolutions used to bin the final mcool file 
-#'   (Default: 5 levels of resolution automatically inferred according to genome size)
+#' @param binning First resolution used to bin the final mcool file 
+#'   (Default: 10000 for `hg38` and `mm10`, 1000 for `dm6`, `R64-1-1`, ...)
 #' @param restriction Restriction enzyme(s) used in HiC (Default: "DpnII,HinfI")
 #' @param iterative Should the read mapping be performed iteratively? 
 #'   (Default: TRUE)
@@ -85,11 +85,11 @@ NULL
 #' @export 
 
 HiCool <- function(
-    r1, 
-    r2, 
-    genome, 
+    r1 = '~/repos/tinyMapper/tests/testHiC_R1.fq.gz', 
+    r2 = '~/repos/tinyMapper/tests/testHiC_R2.fq.gz', 
+    genome = 'R64-1-1', 
     restriction = 'DpnII,HinfI', 
-    resolutions = NULL, 
+    binning = NULL, 
     iterative = TRUE, 
     balancing_args = " --min-nnz 10 --mad-max 5 ", 
     threads = 1L, 
@@ -100,24 +100,35 @@ HiCool <- function(
     scratch = tempdir()  
 )
 {
+    ###############################################
+    ## ------------- Correct paths ------------- ##
+    ###############################################
     r1 <- normalizePath(r1)
     r2 <- normalizePath(r2)
     output <- normalizePath(output, mustWork = FALSE)
     genome <- .checkGenome(genome)
 
-    proc <- basilisk::basiliskStart(env_HiCool)
-    on.exit(basilisk::basiliskStop(proc))
-    hash <- basilisk::basiliskRun(
-        env = env_HiCool, 
-        fun = .processFastq,
+    ###############################################
+    ## -------- Get path to python bins -------- ##
+    ###############################################
+    env_dir <- do.call(basilisk.utils::createEnvironment, HiCool_args)
+    reticulate::use_condaenv(env_dir, required = TRUE)
+    hs <- reticulate::import("hicstuff")
+    cooler <- reticulate::import("cooler")
+
+    ##############################################
+    ## --------- Process reads ---------------- ##
+    ###############################################
+    hash <- .processFastq(
+        env_dir = env_dir,
         r1 = r1, 
         r2 = r2, 
         genome = genome, 
-        resolutions = resolutions, 
+        binning = binning, 
         restriction = restriction, 
         iterative = iterative, 
         balancing_args = balancing_args, 
-        threads = as.integer(threads), 
+        threads = threads, 
         output = output, 
         exclude_chr = exclude_chr, 
         keep_bam = keep_bam, 
@@ -126,6 +137,10 @@ HiCool <- function(
     hcf <- importHiCoolFolder(output, hash)
     message("HiCool :: .fastq to .mcool processing done!")
     message("HiCool :: Check ", output, "folder to find the generated files")
+
+    ##################################################
+    ## --------- Generate report ---------------- ##
+    ##################################################
     if (build_report) {
         message("HiCool :: Generating HiCool report. This might take a while.")
         HiCReport(hcf)
@@ -136,10 +151,11 @@ HiCool <- function(
 }
 
 .processFastq <- function(
+    env_dir,
     r1, 
     r2, 
     genome, 
-    resolutions, 
+    binning, 
     restriction, 
     iterative, 
     balancing_args, 
@@ -150,36 +166,40 @@ HiCool <- function(
     scratch  
 ) {
 
-    ###############################################
-    ## -------- Import python libraries -------- ##
-    ###############################################
-
-    hs <- reticulate::import("hicstuff")
-    cooler <- reticulate::import("cooler")
-
     ##############################################
     ## ----------- Define variables ----------- ##
     ##############################################
 
     hash <- paste0(sample(c(LETTERS, 0:9), 6, replace = TRUE), collapse = '')
     tmp_folder <- file.path(scratch, hash)
-    message("HiCool :: Initiating processing of fastq files [tmp folder: ", tmp_folder, "]...")
+    message("HiCool :: Initializing processing of fastq files [tmp folder: ", tmp_folder, "]...")
     prefix <- paste0(
         gsub('[._][rR][12].*', '', basename(r1)), 
         '^mapped-', gsub('.fa$', '', basename(genome)), 
         '^', hash
     )
-    frags <- file.path(tmp_folder, paste0(prefix, '.frags.tsv'))
-    chroms <- file.path(tmp_folder, paste0(prefix, '.chr.tsv'))
-    filtered_chroms <- file.path(tmp_folder, paste0(prefix, '.chr_filtered.tsv'))
-    contact_map <- file.path(tmp_folder, paste0(prefix, '.cool'))
-    rebinned_prefix <- file.path(tmp_folder, paste0(prefix, '_res0'))
-    contact_map_rebinned <- file.path(tmp_folder, paste0(prefix, '_res0.cool'))
-    contact_map_filtered <- file.path(tmp_folder, paste0(prefix, '_res0_filtered.cool'))
-    contact_map_mcool <- file.path(tmp_folder, paste0(prefix, '_res0.mcool'))
+    contact_map_mcool <- file.path(tmp_folder, paste0(prefix, '.mcool'))
     sinked_log <- file.path(tmp_folder, paste0(prefix, '.Rlog'))
     dir.create(tmp_folder, showWarnings = FALSE, recursive = TRUE)
     on.exit(unlink(tmp_folder))
+
+    ###########################################################################
+    ## ---- Automatically deduce appropriate binning if unspecified -------- ##
+    ###########################################################################
+
+    if (is.null(binning)) {
+        binning <- ifelse(
+            grepl('hg38|mm10', genome, ignore.case = TRUE), 
+            10000,
+            ifelse(
+                grepl('dm6|R64-1-1|GRZc10|WBcel235|Galgal4', genome, ignore.case = TRUE), 
+                1000, 
+                stop(
+                    "Please specify a binning resolution using the `binning` argument."
+                )
+            )
+        )
+    }
 
     ###############################################
     ## -------- Map reads with hicstuff -------- ##
@@ -194,9 +214,8 @@ HiCool <- function(
         filter_events = TRUE, 
         force = TRUE, 
         mapping = ifelse(iterative, "iterative", "normal"),
-        mat_fmt = "cool",
-        min_qual = 10,
-        min_size = 0,
+        binning = as.integer(binning),
+        exclude = gsub("\\|", ",", exclude_chr),
         no_cleanup = TRUE,
         out_dir = tmp_folder, 
         pcr_duplicates = TRUE, 
@@ -211,7 +230,7 @@ HiCool <- function(
         paste0("HiCool argument ::: r1: ", r1),
         paste0("HiCool argument ::: r2: ", r2),
         paste0("HiCool argument ::: genome: ", genome),
-        paste0("HiCool argument ::: resolutions: ", resolutions),
+        paste0("HiCool argument ::: binning: ", binning),
         paste0("HiCool argument ::: restriction: ", restriction),
         paste0("HiCool argument ::: iterative: ", iterative),
         paste0("HiCool argument ::: balancing_args: ", balancing_args),
@@ -223,101 +242,6 @@ HiCool <- function(
         "----------------",
         readLines(log_file)
     ), log_file)
-
-    ###########################################################################
-    ## ---- Automatically deduce appropriate resolutions if unspecified ---- ##
-    ###########################################################################
-
-    chrs <- utils::read.delim(file.path(tmp_folder, paste0(prefix, '.chr.tsv')), sep = '\t') 
-    if (is.null(resolutions)) { 
-        list_resolutions <- list(
-            c(100, 200, 400, 800, 1600),
-            c(1000, 2000, 4000, 8000, 16000),
-            c(4000, 8000, 16000, 32000, 64000, 128000, 256000, 512000),
-            c(10000, 20000, 40000, 80000, 160000, 320000, 640000, 1280000, 2560000)
-        )
-        tot_length <- sum(chrs$length)
-        resolutions_idx <- ifelse(
-            tot_length < 16000, 1, ifelse(
-            tot_length >= 16000 & tot_length < 100000000, 2, ifelse(
-            tot_length >= 100000000 & tot_length < 1000000000, 3,
-            tot_length >= 1000000000 ~ 4
-        )))
-        first_res <- list_resolutions[[resolutions_idx]][1]
-        message("HiCool :: Best-suited minimum resolution automatically inferred: ", first_res)
-        resolutions <- list_resolutions[[resolutions_idx]]
-    }
-    else {
-        first_res <- resolutions[[1]]
-    }
-
-    ############################################################
-    ## -------- Exclude unwanted chr. from cool file -------- ##
-    ############################################################
-
-    excludable_chrs <- grep(exclude_chr, chrs$contig, value = TRUE)
-    if (length(excludable_chrs)) {
-        message("HiCool :: Removing unwanted chromosomes...")
-        chr <- readLines(file.path(tmp_folder, paste0(prefix, '.chr.tsv'))) 
-        chr <- grep(exclude_chr, chr, invert = TRUE, value = TRUE)
-        chr <- grep('contig', chr, invert = TRUE, value = TRUE)
-        writeLines(chr, filtered_chroms)
-    }
-    else {
-        chr <- readLines(file.path(tmp_folder, paste0(prefix, '.chr.tsv'))) 
-        chr <- grep('contig', chr, invert = TRUE, value = TRUE)
-        writeLines(chr, filtered_chroms)
-    }
-
-    ############################################################
-    ## --------------- Parse pairs into cool ---------------- ##
-    ############################################################
-
-    message("HiCool :: Parsing pairs into .cool file...")
-    cooler$cli$cload$pairs$callback(
-        bins = paste0(filtered_chroms, ":", first_res), 
-        pairs_path = file.path(tmp_folder, 'tmp',  paste0(prefix, '.valid_idx_pcrfree.pairs')), 
-        cool_path = contact_map_filtered, 
-        metadata = NULL, 
-        assembly = NULL, 
-        chunksize = 20e6L, 
-        zero_based = TRUE, 
-        comment_char = "#", 
-        input_copy_status = NULL, 
-        no_symmetric_upper = FALSE, 
-        field = "", 
-        temp_dir = file.path(tmp_folder, 'tmp'), 
-        no_delete_temp = FALSE, 
-        max_merge = 200L, 
-        storage_options = NULL, 
-        append = FALSE, 
-        chrom1 = 2L, 
-        pos1 = 3L, 
-        chrom2 = 4L, 
-        pos2 = 5L 
-    ) |> reticulate::py_capture_output() |> write(sinked_log, append = TRUE)
-
-    ########################################################################
-    ## -------- Generate a multi-resolution, balanced mcool file -------- ##
-    ########################################################################
-
-    message("HiCool :: Generating multi-resolution .mcool file...")
-    cooler$zoomify_cooler(
-        base_uris = contact_map_filtered, 
-        outfile = contact_map_mcool, 
-        resolutions = as.integer(resolutions), 
-        chunksize = 10000000L, 
-        nproc = threads, 
-        columns = NULL, 
-        dtypes = NULL, 
-        agg = NULL
-    ) |> reticulate::py_capture_output() |> write(sinked_log, append = TRUE)
-    message("HiCool :: Balancing .mcool file...")
-    cooler$cli$zoomify$invoke_balance(
-        args = paste0("--nproc ", threads, balancing_args), 
-        resolutions = as.integer(resolutions), 
-        outfile = contact_map_mcool  
-    ) |> reticulate::py_capture_output() |> write(sinked_log, append = TRUE)
 
     ##########################################
     ## -------- Tidy-up everything -------- ##
@@ -347,8 +271,9 @@ HiCool <- function(
 
     # Pairs
     dir.create(file.path(output, 'pairs'), showWarnings = FALSE, recursive = TRUE)
+    pairs_files <- list.files(tmp_folder, pattern = '.pairs', recursive = TRUE, full.names = TRUE)
     file.copy(
-        list.files(tmp_folder, pattern = paste0(hash, '.valid_idx_pcrfree.pairs'), recursive = TRUE, full.names = TRUE), 
+        pairs_files[which.max(nchar(pairs_files))],
         file.path(output, 'pairs', paste0(prefix, '.pairs'))
     )
 
