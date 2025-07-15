@@ -54,7 +54,7 @@ x <- HiCool(
     r1 = '<PATH-TO-R1.fq.gz>', 
     r2 = '<PATH-TO-R2.fq.gz>', 
     restriction = '<RE1(,RE2)>', 
-    resolutions = "<resolutions of interest>", 
+    binning = "<minimum resolution>", 
     genome = '<GENOME_ID>'
 )
 ```
@@ -73,7 +73,7 @@ hcf <- HiCool(
     r1 = HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'fastq_R1'), 
     r2 = HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'fastq_R2'), 
     restriction = 'DpnII,HinfI', 
-    resolutions = c(4000, 8000, 16000), 
+    binning = 1000, 
     genome = 'R64-1-1', 
     output = './HiCool/'
 )
@@ -137,17 +137,19 @@ several dependencies, to (1) align reads to a reference genome, (2) manage
 alignment files (SAM), (3) filter pairs, (4) bin them to a specific resolution 
 and (5) 
 
-All system dependencies are internally managed by `basilisk`. `HiCool` maintains 
-a `basilisk` environment containing: 
+All system dependencies are internally managed by `basilisk.utils`. `HiCool` maintains 
+a `conda` environment containing: 
 
-- `python 3.9.1`
-- `bowtie2 2.4.5`
-- `samtools 1.7`
-- `hicstuff 3.1.5`
-- `cooler 0.8.11`
+- `python 3.12.11`
+- `numpy 1.26.4`
+- `bowtie2 2.5.4`
 - `chromosight 1.6.3`
+- `cooler 0.10.3`
+- `hicstuff 3.2.4`
+- `pairtools 1.1.3`
+- `samtools 1.22.1`
 
-The first time `HiCool()` is executed, a fresh `basilisk` environment will 
+The first time `HiCool()` is executed, a fresh `conda` environment will 
 be created and required dependencies automatically installed. This ensures 
 compatibility between the different system dependencies needed to process 
 Hi-C fastq files. 

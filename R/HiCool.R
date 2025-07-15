@@ -62,13 +62,13 @@
 #' @return A `CoolFile` object with prefilled `pairsFile` and `metadata` slots.
 #' 
 #' @importClassesFrom HiCExperiment CoolFile
-#' @import HiCExperiment
 #' @importFrom HiCExperiment CoolFile
 #' @importFrom stringr str_replace_all
-#' @importFrom basilisk basiliskStart
-#' @importFrom basilisk basiliskStop
-#' @importFrom basilisk basiliskRun
 #' @importFrom utils read.delim
+#' @importFrom basilisk.utils createEnvironment
+#' @importFrom reticulate use_condaenv
+#' @importFrom reticulate import 
+#' @importFrom reticulate py_capture_output
 #' @export
 #' 
 #' @examples 

@@ -8,11 +8,11 @@
 \title{Processing Hi-C paired-end fastq files in R}
 \usage{
 HiCool(
-  r1,
-  r2,
-  genome,
+  r1 = "~/repos/tinyMapper/tests/testHiC_R1.fq.gz",
+  r2 = "~/repos/tinyMapper/tests/testHiC_R2.fq.gz",
+  genome = "R64-1-1",
   restriction = "DpnII,HinfI",
-  resolutions = NULL,
+  binning = NULL,
   iterative = TRUE,
   balancing_args = " --min-nnz 10 --mad-max 5 ",
   threads = 1L,
@@ -43,8 +43,8 @@ references: \code{hg38}, \code{mm10}, \code{dm6}, \code{R64-1-1}, \code{GRZc10},
 
 \item{restriction}{Restriction enzyme(s) used in HiC (Default: "DpnII,HinfI")}
 
-\item{resolutions}{Resolutions used to bin the final mcool file
-(Default: 5 levels of resolution automatically inferred according to genome size)}
+\item{binning}{First resolution used to bin the final mcool file
+(Default: 10000 for \code{hg38} and \code{mm10}, 1000 for \code{dm6}, \code{R64-1-1}, ...)}
 
 \item{iterative}{Should the read mapping be performed iteratively?
 (Default: TRUE)}
@@ -110,7 +110,7 @@ r1 <- HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'fastq_R1')
 r2 <- HiContactsData::HiContactsData(sample = 'yeast_wt', format = 'fastq_R2')
 hcf <- HiCool(r1, r2, genome = 'R64-1-1', output = './HiCool/')
 hcf
-getHiCoolArgs(S4Vectors::metadata(hcf)$log)
-getHicStats(S4Vectors::metadata(hcf)$log)
-readLines(S4Vectors::metadata(hcf)$log)
+getHiCoolArgs(metadata(hcf)$log)
+getHicStats(metadata(hcf)$log)
+readLines(metadata(hcf)$log)
 }
