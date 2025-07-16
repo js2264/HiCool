@@ -83,13 +83,13 @@ getLoops <- function(
         "--subsample" = nreads, 
         "--threads" = ncores 
     )
-    loops <- .getLoops(args)
+    loops <- .getLoops(cs, args)
     topologicalFeatures(x, 'loops') <- loops
     metadata(x)[['chromosight_args']] <- args
     return(x)
 }
 
-.getLoops <- function(chromosight_args) {
+.getLoops <- function(cs, chromosight_args) {
     cs$cli$chromosight$cmd_detect(chromosight_args)
     df <- vroom::vroom(paste0(chromosight_args[['<prefix>']], '.tsv'), show_col_types = FALSE)
     loops <- InteractionSet::GInteractions(

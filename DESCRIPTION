@@ -26,6 +26,7 @@ Imports:
     InteractionSet, 
     vroom, 
     basilisk.utils,
+    basilisk,
     reticulate,
     rmarkdown,
     rmdformats,

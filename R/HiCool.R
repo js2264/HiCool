@@ -114,13 +114,12 @@ HiCool <- function(
     env_dir <- do.call(basilisk.utils::createEnvironment, HiCool_args)
     reticulate::use_condaenv(env_dir, required = TRUE)
     hs <- reticulate::import("hicstuff")
-    cooler <- reticulate::import("cooler")
 
     ##############################################
     ## --------- Process reads ---------------- ##
     ###############################################
     hash <- .processFastq(
-        env_dir = env_dir,
+        hs = hs,
         r1 = r1, 
         r2 = r2, 
         genome = genome, 
@@ -151,7 +150,7 @@ HiCool <- function(
 }
 
 .processFastq <- function(
-    env_dir,
+    hs,
     r1, 
     r2, 
     genome, 
@@ -214,7 +213,7 @@ HiCool <- function(
         filter_events = TRUE, 
         force = TRUE, 
         mapping = ifelse(iterative, "iterative", "normal"),
-        binning = as.integer(binning),
+        binning = as.character(binning),
         exclude = gsub("\\|", ",", exclude_chr),
         no_cleanup = TRUE,
         out_dir = tmp_folder, 

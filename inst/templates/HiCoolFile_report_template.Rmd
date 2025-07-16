@@ -34,7 +34,7 @@ x <- CoolFile(
         args = list_args
     )
 )
-hic <- import(x)
+hic <- HiCExperiment::import(x)
 
 ## -- Generate strings for text 
 string_hicool <- paste0("HiCool v. ", packageVersion('HiCool'))
@@ -199,6 +199,8 @@ grep(':: INFO :: variance is', l, invert = TRUE, value = TRUE) |>
 > System
 
 ```{r}
+env_dir <- do.call(basilisk.utils::createEnvironment, HiCool_args)
+reticulate::use_condaenv(env_dir, required = TRUE)
 message(
     "OS:\t\t\t\t", sessioninfo::os_name(), '\n',
     "system:\t\t\t", version$system, '\n',
