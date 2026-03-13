@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">HiCool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.10.1</span>
       </span>
     </div>
 
@@ -44,7 +44,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Finding loops in contact map</h1>
-    <small class="dont-index">Source: <a href="https://github.com/js2264/HiCool/blob/devel/R/loops.R" class="external-link"><code>R/loops.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/js2264/HiCool/blob/RELEASE_3_22/R/loops.R" class="external-link"><code>R/loops.R</code></a></small>
     <div class="hidden name"><code>getLoops.Rd</code></div>
     </div>
 
@@ -127,105 +127,11 @@ storing significant interactions identified by chromosight, and an additional
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">contacts_yeast</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/HiCExperiment/man/data.html" class="external-link">contacts_yeast</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> see ?HiContactsData and browseVignettes('HiContactsData') for documentation</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> loading from cache</span>
-<span class="r-in"><span><span class="va">contacts_yeast</span> <span class="op">&lt;-</span> <span class="fu">getLoops</span><span class="op">(</span><span class="va">contacts_yeast</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">S4Vectors</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html" class="external-link">metadata</a></span><span class="op">(</span><span class="va">contacts_yeast</span><span class="op">)</span><span class="op">$</span><span class="va">chromosight_args</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`--pattern`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "loops"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`--dump`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpiWs7nh"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`--inter`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`--iterations`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "auto"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`--kernel-config`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`--perc-zero`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "auto"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`--perc-undetected`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "auto"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`--tsvd`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`--win-fmt`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "json"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`--win-size`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "auto"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`--no-plotting`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`--smooth-trend`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`--norm`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "auto"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`&lt;contact_map&gt;`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/github/home/.cache/R/ExperimentHub/8d9e14fbbff6_7752::/resolutions/16000"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`--max-dist`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "auto"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`--min-dist`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "auto"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`--min-separation`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "auto"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`--n-mads`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`&lt;prefix&gt;`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "chromosight/chromo"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`--pearson`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "auto"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`--subsample`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "no"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`--threads`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/pkg/HiCExperiment/man/AllGenerics.html" class="external-link">topologicalFeatures</a></span><span class="op">(</span><span class="va">contacts_yeast</span>, <span class="st">'loops'</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> GInteractions object with 53 interactions and 5 metadata columns:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        seqnames1       ranges1     seqnames2       ranges2 |   bin_id1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            &lt;Rle&gt;     &lt;IRanges&gt;         &lt;Rle&gt;     &lt;IRanges&gt; | &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [1]        II   16001-32000 ---        II 416001-432000 |        16</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [2]        II   16001-32000 ---        II 624001-640000 |        16</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [3]        II 160001-176000 ---        II 336001-352000 |        25</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [4]        II 432001-448000 ---        II 576001-592000 |        42</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [5]       III   16001-32000 ---       III 176001-192000 |        67</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    ...       ...           ... ...       ...           ... .       ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [49]       XVI   16001-32000 ---       XVI 272001-288000 |       704</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [50]       XVI 304001-320000 ---       XVI 384001-400000 |       722</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [51]       XVI 400001-416000 ---       XVI 672001-688000 |       728</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [52]       XVI 720001-736000 ---       XVI 928001-944000 |       748</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [53]       XVI 704001-720000 ---       XVI 768001-784000 |       747</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          bin_id2     score    pvalue    qvalue</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [1]        41  0.367443 6.316e-07 6.832e-07</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [2]        54  0.420304 7.000e-09 9.600e-09</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [3]        36  0.492732 0.000e+00 0.000e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [4]        51  0.417455 0.000e+00 0.000e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [5]        77  0.458787 2.100e-09 3.100e-09</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    ...       ...       ...       ...       ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [49]       720  0.587076 0.000e+00 0.000e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [50]       727  0.326277 5.085e-07 5.734e-07</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [51]       745  0.601166 0.000e+00 0.000e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [52]       761  0.567326 0.000e+00 0.000e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [53]       751  0.333732 5.591e-07 6.174e-07</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   -------</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   regions: 98 ranges and 0 metadata columns</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   seqinfo: 14 sequences from an unspecified genome; no seqlengths</span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span>  <span class="va">contacts_yeast</span> <span class="op">&lt;-</span> <span class="fu">getLoops</span><span class="op">(</span><span class="va">contacts_yeast</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html" class="external-link">metadata</a></span><span class="op">(</span><span class="va">contacts_yeast</span><span class="op">)</span><span class="op">$</span><span class="va">chromosight_args</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/pkg/HiCExperiment/man/AllGenerics.html" class="external-link">topologicalFeatures</a></span><span class="op">(</span><span class="va">contacts_yeast</span>, <span class="st">'loops'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -240,7 +146,7 @@ storing significant interactions identified by chromosight, and an additional
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
       </footer></div>

@@ -1,0 +1,48 @@
+HiCool working directory ::: /__w/HiCool/HiCool/docs/reference
+HiCool argument ::: r1: /github/home/.cache/R/ExperimentHub/36977c60a305_7833
+HiCool argument ::: r2: /github/home/.cache/R/ExperimentHub/369711c3c55c_7834
+HiCool argument ::: genome: /tmp/RtmpFc88CO/R64-1-1
+HiCool argument ::: binning: 1000
+HiCool argument ::: restriction: DpnII,HinfI
+HiCool argument ::: iterative: TRUE
+HiCool argument ::: balancing_args:  --min-nnz 10 --mad-max 5 
+HiCool argument ::: threads: 1
+HiCool argument ::: output: ./HiCool/
+HiCool argument ::: exclude_chr: Mito|chrM|MT
+HiCool argument ::: keep_bam: FALSE
+HiCool argument ::: scratch: /tmp/RtmpFc88CO
+----------------
+## hicstuff: v3.2.4 log file
+## date: 2026-03-13 00:43:39
+## enzyme: DpnII,HinfI
+## input1: /github/home/.cache/R/ExperimentHub/36977c60a305_7833 
+## input2: /github/home/.cache/R/ExperimentHub/369711c3c55c_7834
+## ref: /tmp/RtmpFc88CO/R64-1-1
+---
+2026-03-13,00:43:39 :: INFO :: The default output format is now `.cool`. The Hi-C matrix will be generated with cooler v0.10.3 (Abdennur & Mirny, Bioinformatics 2020).
+2026-03-13,00:43:41 :: INFO :: Checking content of fastq files.
+2026-03-13,00:43:42 :: INFO :: 100000 reads found in each fastq file.
+2026-03-13,00:43:42 :: INFO :: 100000 reads to parse
+2026-03-13,00:43:42 :: INFO :: Truncating unaligned reads to 20bp and mapping.
+2026-03-13,00:43:42 :: INFO :: 100000 reads left to map.
+2026-03-13,00:43:42 :: INFO :: Trying to map unaligned reads at full length (35bp).
+2026-03-13,00:43:45 :: INFO :: 23337 reads left to map.
+2026-03-13,00:43:46 :: INFO :: 76663 reads aligned / 100000 total reads.
+2026-03-13,00:43:46 :: INFO :: 100000 reads to parse
+2026-03-13,00:43:46 :: INFO :: Truncating unaligned reads to 20bp and mapping.
+2026-03-13,00:43:46 :: INFO :: 100000 reads left to map.
+2026-03-13,00:43:46 :: INFO :: Trying to map unaligned reads at full length (35bp).
+2026-03-13,00:43:49 :: INFO :: 24859 reads left to map.
+2026-03-13,00:43:50 :: INFO :: 75141 reads aligned / 100000 total reads.
+2026-03-13,00:43:53 :: INFO :: 76% reads (single ends) mapped with Q >= 30 (151804/200000)
+2026-03-13,00:43:54 :: INFO :: 64761 pairs successfully mapped (64.76%)
+2026-03-13,00:43:54 :: INFO :: Filtering with thresholds: uncuts=7 loops=7
+2026-03-13,00:43:55 :: INFO :: Proportion of inter contacts: 21.89% (intra: 41829, inter: 11724)
+2026-03-13,00:43:55 :: INFO :: 11208 pairs discarded: Loops: 1910, Uncuts: 9266, Weirds: 32
+2026-03-13,00:43:55 :: INFO :: 53553 pairs kept (82.69%)
+2026-03-13,00:43:57 :: INFO :: 1% PCR duplicates have been filtered out (613 / 53553 pairs) 
+2026-03-13,00:43:57 :: INFO :: 52940 pairs remaining after removing PCR duplicates
+2026-03-13,00:43:57 :: INFO :: Generating matrix from pairs file /tmp/RtmpFc88CO/WL4DIE/tmp/36977c60a305_7833^mapped-R64-1-1^WL4DIE.valid_idx_pcrfree.pairs (52940 pairs in the file) 
+2026-03-13,00:44:06 :: INFO :: Fetching mapping and pairing stats
+2026-03-13,00:44:06 :: INFO :: {'Sample': '36977c60a305_7833^mapped-R64-1-1^WL4DIE', 'Total read pairs': 100000, 'Mapped reads': 151804, 'Unmapped reads': 48196, 'Recovered contacts': 64761, 'Final contacts': 52940, 'Removed contacts': 11821, 'Filtered out': 11208, 'Loops': 1910, 'Uncuts': 9266, 'Weirds': 32, 'PCR duplicates': 613}
+2026-03-13,00:44:07 :: INFO :: Contact map generated after 0h 0m 28s

@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">HiCool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.10.1</span>
       </span>
     </div>
 
@@ -69,9 +69,9 @@
                         <h4 data-toc-skip class="author">Jacques
 Serizay</h4>
             
-            <h4 data-toc-skip class="date">2025-03-18</h4>
+            <h4 data-toc-skip class="date">2026-03-13</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/js2264/HiCool/blob/devel/vignettes/HiCool.Rmd" class="external-link"><code>vignettes/HiCool.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/js2264/HiCool/blob/RELEASE_3_22/vignettes/HiCool.Rmd" class="external-link"><code>vignettes/HiCool.Rmd</code></a></small>
       <div class="hidden name"><code>HiCool.Rmd</code></div>
 
     </div>
@@ -120,7 +120,7 @@ ID character (<code>hg38</code>, <code>mm10</code>, <code>dm6</code>,
 <span>    r1 <span class="op">=</span> <span class="st">'&lt;PATH-TO-R1.fq.gz&gt;'</span>, </span>
 <span>    r2 <span class="op">=</span> <span class="st">'&lt;PATH-TO-R2.fq.gz&gt;'</span>, </span>
 <span>    restriction <span class="op">=</span> <span class="st">'&lt;RE1(,RE2)&gt;'</span>, </span>
-<span>    resolutions <span class="op">=</span> <span class="st">"&lt;resolutions of interest&gt;"</span>, </span>
+<span>    binning <span class="op">=</span> <span class="st">"&lt;minimum resolution&gt;"</span>, </span>
 <span>    genome <span class="op">=</span> <span class="st">'&lt;GENOME_ID&gt;'</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Here is a concrete example of Hi-C data processing.</p>
@@ -142,7 +142,7 @@ directory.</li>
 <span>    r1 <span class="op">=</span> <span class="fu">HiContactsData</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/HiContactsData/man/HiContactsData.html" class="external-link">HiContactsData</a></span><span class="op">(</span>sample <span class="op">=</span> <span class="st">'yeast_wt'</span>, format <span class="op">=</span> <span class="st">'fastq_R1'</span><span class="op">)</span>, </span>
 <span>    r2 <span class="op">=</span> <span class="fu">HiContactsData</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/HiContactsData/man/HiContactsData.html" class="external-link">HiContactsData</a></span><span class="op">(</span>sample <span class="op">=</span> <span class="st">'yeast_wt'</span>, format <span class="op">=</span> <span class="st">'fastq_R2'</span><span class="op">)</span>, </span>
 <span>    restriction <span class="op">=</span> <span class="st">'DpnII,HinfI'</span>, </span>
-<span>    resolutions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4000</span>, <span class="fl">8000</span>, <span class="fl">16000</span><span class="op">)</span>, </span>
+<span>    binning <span class="op">=</span> <span class="fl">1000</span>, </span>
 <span>    genome <span class="op">=</span> <span class="st">'R64-1-1'</span>, </span>
 <span>    output <span class="op">=</span> <span class="st">'./HiCool/'</span></span>
 <span><span class="op">)</span></span>
@@ -151,47 +151,37 @@ directory.</li>
 <span><span class="co">#&gt; see ?HiContactsData and browseVignettes('HiContactsData') for documentation</span></span>
 <span><span class="co">#&gt; loading from cache</span></span>
 <span><span class="co">#&gt; HiCool :: Recovering bowtie2 genome index from AWS iGenomes...</span></span>
-<span><span class="co">#&gt; HiCool :: Initiating processing of fastq files [tmp folder: /tmp/RtmpMpAbUV/WL4DIE]...</span></span>
+<span><span class="co">#&gt; HiCool :: Initializing processing of fastq files [tmp folder: /tmp/RtmpQXIRIq/WL4DIE]...</span></span>
 <span><span class="co">#&gt; HiCool :: Mapping fastq files...</span></span>
-<span><span class="co">#&gt; HiCool :: Removing unwanted chromosomes...</span></span>
-<span><span class="co">#&gt; HiCool :: Parsing pairs into .cool file...</span></span>
-<span><span class="co">#&gt; HiCool :: Generating multi-resolution .mcool file...</span></span>
-<span><span class="co">#&gt; HiCool :: Balancing .mcool file...</span></span>
 <span><span class="co">#&gt; HiCool :: Tidying up everything for you...</span></span>
 <span><span class="co">#&gt; HiCool :: .fastq to .mcool processing done!</span></span>
 <span><span class="co">#&gt; HiCool :: Check ./HiCool/folder to find the generated files</span></span>
 <span><span class="co">#&gt; HiCool :: Generating HiCool report. This might take a while.</span></span>
-<span><span class="co">#&gt; HiCool :: Report generated and available @ /__w/HiCool/HiCool/vignettes/HiCool/847264387f3_7833^mapped-R64-1-1^WL4DIE.html</span></span>
+<span><span class="co">#&gt; HiCool :: Report generated and available @ /__w/HiCool/HiCool/vignettes/HiCool/36977c60a305_7833^mapped-R64-1-1^WL4DIE.html</span></span>
 <span><span class="co">#&gt; HiCool :: All processing successfully achieved. Congrats!</span></span></code></pre></div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hcf</span></span>
 <span><span class="co">#&gt; CoolFile object</span></span>
-<span><span class="co">#&gt; .mcool file: ./HiCool//matrices/847264387f3_7833^mapped-R64-1-1^WL4DIE.mcool </span></span>
-<span><span class="co">#&gt; resolution: 4000 </span></span>
-<span><span class="co">#&gt; pairs file: ./HiCool//pairs/847264387f3_7833^mapped-R64-1-1^WL4DIE.pairs </span></span>
+<span><span class="co">#&gt; .mcool file: ./HiCool//matrices/36977c60a305_7833^mapped-R64-1-1^WL4DIE.mcool </span></span>
+<span><span class="co">#&gt; resolution: 1000 </span></span>
+<span><span class="co">#&gt; pairs file: ./HiCool//pairs/36977c60a305_7833^mapped-R64-1-1^WL4DIE.pairs </span></span>
 <span><span class="co">#&gt; metadata(3): log args stats</span></span>
 <span><span class="fu">S4Vectors</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html" class="external-link">metadata</a></span><span class="op">(</span><span class="va">hcf</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $log</span></span>
-<span><span class="co">#&gt; [1] "./HiCool//logs/847264387f3_7833^mapped-R64-1-1^WL4DIE.log"</span></span>
+<span><span class="co">#&gt; [1] "./HiCool//logs/36977c60a305_7833^mapped-R64-1-1^WL4DIE.log"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $args</span></span>
 <span><span class="co">#&gt; $args$r1</span></span>
-<span><span class="co">#&gt; [1] "/github/home/.cache/R/ExperimentHub/847264387f3_7833"</span></span>
+<span><span class="co">#&gt; [1] "/github/home/.cache/R/ExperimentHub/36977c60a305_7833"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $args$r2</span></span>
-<span><span class="co">#&gt; [1] "/github/home/.cache/R/ExperimentHub/84723a7b0539_7834"</span></span>
+<span><span class="co">#&gt; [1] "/github/home/.cache/R/ExperimentHub/369711c3c55c_7834"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $args$genome</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpMpAbUV/R64-1-1"</span></span>
+<span><span class="co">#&gt; [1] "/tmp/RtmpQXIRIq/R64-1-1"</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $args$resolutions</span></span>
-<span><span class="co">#&gt; [1] "4000"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $args$resolutions</span></span>
-<span><span class="co">#&gt; [1] "8000"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $args$resolutions</span></span>
-<span><span class="co">#&gt; [1] "16000"</span></span>
+<span><span class="co">#&gt; $args$binning</span></span>
+<span><span class="co">#&gt; [1] "1000"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $args$restriction</span></span>
 <span><span class="co">#&gt; [1] "DpnII,HinfI"</span></span>
@@ -215,7 +205,7 @@ directory.</li>
 <span><span class="co">#&gt; [1] FALSE</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $args$scratch</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpMpAbUV"</span></span>
+<span><span class="co">#&gt; [1] "/tmp/RtmpQXIRIq"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $args$wd</span></span>
 <span><span class="co">#&gt; [1] "/__w/HiCool/HiCool/vignettes"</span></span>
@@ -226,25 +216,25 @@ directory.</li>
 <span><span class="co">#&gt; [1] 1e+05</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $stats$nPairs</span></span>
-<span><span class="co">#&gt; [1] 73993</span></span>
+<span><span class="co">#&gt; [1] 64761</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $stats$nDangling</span></span>
-<span><span class="co">#&gt; [1] 10027</span></span>
+<span><span class="co">#&gt; [1] 9266</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $stats$nSelf</span></span>
-<span><span class="co">#&gt; [1] 2205</span></span>
+<span><span class="co">#&gt; [1] 1910</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $stats$nDumped</span></span>
-<span><span class="co">#&gt; [1] 83</span></span>
+<span><span class="co">#&gt; [1] 32</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $stats$nFiltered</span></span>
-<span><span class="co">#&gt; [1] 61678</span></span>
+<span><span class="co">#&gt; [1] 53553</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $stats$nDups</span></span>
-<span><span class="co">#&gt; [1] 719</span></span>
+<span><span class="co">#&gt; [1] 613</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $stats$nUnique</span></span>
-<span><span class="co">#&gt; [1] 60959</span></span>
+<span><span class="co">#&gt; [1] 52940</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $stats$threshold_uncut</span></span>
 <span><span class="co">#&gt; [1] 7</span></span>
@@ -342,30 +332,31 @@ publication</a>.</li>
 reads to a reference genome, (2) manage alignment files (SAM), (3)
 filter pairs, (4) bin them to a specific resolution and (5)</p>
 <p>All system dependencies are internally managed by
-<code>basilisk</code>. <code>HiCool</code> maintains a
-<code>basilisk</code> environment containing:</p>
+<code>basilisk.utils</code>. <code>HiCool</code> maintains a
+<code>conda</code> environment containing:</p>
 <ul>
-<li><code>python 3.9.1</code></li>
-<li><code>bowtie2 2.4.5</code></li>
-<li><code>samtools 1.7</code></li>
-<li><code>hicstuff 3.1.5</code></li>
-<li><code>cooler 0.8.11</code></li>
+<li><code>python 3.12.11</code></li>
+<li><code>numpy 1.26.4</code></li>
+<li><code>bowtie2 2.5.4</code></li>
 <li><code>chromosight 1.6.3</code></li>
+<li><code>cooler 0.10.3</code></li>
+<li><code>hicstuff 3.2.4</code></li>
+<li><code>pairtools 1.1.3</code></li>
+<li><code>samtools 1.22.1</code></li>
 </ul>
 <p>The first time <code><a href="../reference/HiCool.html">HiCool()</a></code> is executed, a fresh
-<code>basilisk</code> environment will be created and required
-dependencies automatically installed. This ensures compatibility between
-the different system dependencies needed to process Hi-C fastq
-files.</p>
+<code>conda</code> environment will be created and required dependencies
+automatically installed. This ensures compatibility between the
+different system dependencies needed to process Hi-C fastq files.</p>
 </div>
 <div class="section level2">
 <h2 id="session-info">Session info<a class="anchor" aria-label="anchor" href="#session-info"></a>
 </h2>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; R Under development (unstable) (2025-03-08 r87910)</span></span>
+<span><span class="co">#&gt; R Under development (unstable) (2026-03-08 r89578)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu</span></span>
-<span><span class="co">#&gt; Running under: Ubuntu 24.04.1 LTS</span></span>
+<span><span class="co">#&gt; Running under: Ubuntu 24.04.4 LTS</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Matrix products: default</span></span>
 <span><span class="co">#&gt; BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 </span></span>
@@ -386,64 +377,64 @@ files.</p>
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt;  [1] HiContactsData_1.9.0 ExperimentHub_2.15.0 AnnotationHub_3.15.0</span></span>
-<span><span class="co">#&gt;  [4] BiocFileCache_2.15.1 dbplyr_2.5.0         BiocGenerics_0.53.6 </span></span>
-<span><span class="co">#&gt;  [7] generics_0.1.3       HiCool_1.7.1         HiCExperiment_1.7.0 </span></span>
-<span><span class="co">#&gt; [10] BiocStyle_2.35.0    </span></span>
+<span><span class="co">#&gt;  [1] HiContactsData_1.13.0 ExperimentHub_3.1.0   AnnotationHub_4.1.0  </span></span>
+<span><span class="co">#&gt;  [4] BiocFileCache_3.1.0   dbplyr_2.5.2          BiocGenerics_0.57.0  </span></span>
+<span><span class="co">#&gt;  [7] generics_0.1.4        HiCool_1.10.1         HiCExperiment_1.11.0 </span></span>
+<span><span class="co">#&gt; [10] BiocStyle_2.39.0     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;   [1] DBI_1.2.3                   rlang_1.1.5                </span></span>
-<span><span class="co">#&gt;   [3] magrittr_2.0.3              matrixStats_1.5.0          </span></span>
-<span><span class="co">#&gt;   [5] compiler_4.5.0              RSQLite_2.3.9              </span></span>
-<span><span class="co">#&gt;   [7] dir.expiry_1.15.0           png_0.1-8                  </span></span>
-<span><span class="co">#&gt;   [9] systemfonts_1.2.1           vctrs_0.6.5                </span></span>
-<span><span class="co">#&gt;  [11] stringr_1.5.1               pkgconfig_2.0.3            </span></span>
-<span><span class="co">#&gt;  [13] crayon_1.5.3                fastmap_1.2.0              </span></span>
-<span><span class="co">#&gt;  [15] XVector_0.47.2              rmdformats_1.0.4           </span></span>
-<span><span class="co">#&gt;  [17] rmarkdown_2.29              sessioninfo_1.2.3          </span></span>
-<span><span class="co">#&gt;  [19] tzdb_0.5.0                  UCSC.utils_1.3.1           </span></span>
-<span><span class="co">#&gt;  [21] strawr_0.0.92               ragg_1.3.3                 </span></span>
-<span><span class="co">#&gt;  [23] purrr_1.0.4                 bit_4.6.0                  </span></span>
-<span><span class="co">#&gt;  [25] xfun_0.51                   cachem_1.1.0               </span></span>
-<span><span class="co">#&gt;  [27] GenomeInfoDb_1.43.4         jsonlite_1.9.1             </span></span>
-<span><span class="co">#&gt;  [29] blob_1.2.4                  rhdf5filters_1.19.2        </span></span>
-<span><span class="co">#&gt;  [31] DelayedArray_0.33.6         Rhdf5lib_1.29.1            </span></span>
-<span><span class="co">#&gt;  [33] BiocParallel_1.41.2         parallel_4.5.0             </span></span>
-<span><span class="co">#&gt;  [35] R6_2.6.1                    bslib_0.9.0                </span></span>
-<span><span class="co">#&gt;  [37] stringi_1.8.4               reticulate_1.41.0.1        </span></span>
-<span><span class="co">#&gt;  [39] GenomicRanges_1.59.1        jquerylib_0.1.4            </span></span>
-<span><span class="co">#&gt;  [41] Rcpp_1.0.14                 bookdown_0.42              </span></span>
-<span><span class="co">#&gt;  [43] SummarizedExperiment_1.37.0 knitr_1.50                 </span></span>
-<span><span class="co">#&gt;  [45] IRanges_2.41.3              Matrix_1.7-3               </span></span>
-<span><span class="co">#&gt;  [47] tidyselect_1.2.1            abind_1.4-8                </span></span>
-<span><span class="co">#&gt;  [49] yaml_2.3.10                 codetools_0.2-20           </span></span>
-<span><span class="co">#&gt;  [51] curl_6.2.1                  lattice_0.22-6             </span></span>
-<span><span class="co">#&gt;  [53] tibble_3.2.1                withr_3.0.2                </span></span>
-<span><span class="co">#&gt;  [55] KEGGREST_1.47.0             InteractionSet_1.35.0      </span></span>
-<span><span class="co">#&gt;  [57] Biobase_2.67.0              basilisk.utils_1.19.1      </span></span>
-<span><span class="co">#&gt;  [59] evaluate_1.0.3              desc_1.4.3                 </span></span>
-<span><span class="co">#&gt;  [61] Biostrings_2.75.4           pillar_1.10.1              </span></span>
-<span><span class="co">#&gt;  [63] BiocManager_1.30.25         filelock_1.0.3             </span></span>
-<span><span class="co">#&gt;  [65] MatrixGenerics_1.19.1       stats4_4.5.0               </span></span>
-<span><span class="co">#&gt;  [67] plotly_4.10.4               vroom_1.6.5                </span></span>
-<span><span class="co">#&gt;  [69] BiocVersion_3.21.1          S4Vectors_0.45.4           </span></span>
-<span><span class="co">#&gt;  [71] ggplot2_3.5.1               munsell_0.5.1              </span></span>
-<span><span class="co">#&gt;  [73] scales_1.3.0                glue_1.8.0                 </span></span>
-<span><span class="co">#&gt;  [75] lazyeval_0.2.2              tools_4.5.0                </span></span>
-<span><span class="co">#&gt;  [77] BiocIO_1.17.1               data.table_1.17.0          </span></span>
-<span><span class="co">#&gt;  [79] fs_1.6.5                    rhdf5_2.51.2               </span></span>
-<span><span class="co">#&gt;  [81] grid_4.5.0                  tidyr_1.3.1                </span></span>
-<span><span class="co">#&gt;  [83] crosstalk_1.2.1             AnnotationDbi_1.69.0       </span></span>
-<span><span class="co">#&gt;  [85] colorspace_2.1-1            GenomeInfoDbData_1.2.14    </span></span>
-<span><span class="co">#&gt;  [87] basilisk_1.19.1             cli_3.6.4                  </span></span>
-<span><span class="co">#&gt;  [89] rappdirs_0.3.3              textshaping_1.0.0          </span></span>
-<span><span class="co">#&gt;  [91] S4Arrays_1.7.3              viridisLite_0.4.2          </span></span>
-<span><span class="co">#&gt;  [93] dplyr_1.1.4                 gtable_0.3.6               </span></span>
-<span><span class="co">#&gt;  [95] sass_0.4.9                  digest_0.6.37              </span></span>
-<span><span class="co">#&gt;  [97] SparseArray_1.7.6           htmlwidgets_1.6.4          </span></span>
-<span><span class="co">#&gt;  [99] memoise_2.0.1               htmltools_0.5.8.1          </span></span>
-<span><span class="co">#&gt; [101] pkgdown_2.1.1               lifecycle_1.0.4            </span></span>
-<span><span class="co">#&gt; [103] httr_1.4.7                  mime_0.13                  </span></span>
+<span><span class="co">#&gt;   [1] DBI_1.3.0                   httr2_1.2.2                </span></span>
+<span><span class="co">#&gt;   [3] rlang_1.1.7                 magrittr_2.0.4             </span></span>
+<span><span class="co">#&gt;   [5] otel_0.2.0                  matrixStats_1.5.0          </span></span>
+<span><span class="co">#&gt;   [7] compiler_4.6.0              RSQLite_2.4.6              </span></span>
+<span><span class="co">#&gt;   [9] dir.expiry_1.19.0           png_0.1-8                  </span></span>
+<span><span class="co">#&gt;  [11] systemfonts_1.3.2           vctrs_0.7.1                </span></span>
+<span><span class="co">#&gt;  [13] stringr_1.6.0               pkgconfig_2.0.3            </span></span>
+<span><span class="co">#&gt;  [15] crayon_1.5.3                fastmap_1.2.0              </span></span>
+<span><span class="co">#&gt;  [17] XVector_0.51.0              rmdformats_1.0.4           </span></span>
+<span><span class="co">#&gt;  [19] rmarkdown_2.30              sessioninfo_1.2.3          </span></span>
+<span><span class="co">#&gt;  [21] tzdb_0.5.0                  strawr_0.0.92              </span></span>
+<span><span class="co">#&gt;  [23] ragg_1.5.1                  purrr_1.2.1                </span></span>
+<span><span class="co">#&gt;  [25] bit_4.6.0                   xfun_0.56                  </span></span>
+<span><span class="co">#&gt;  [27] cachem_1.1.0                jsonlite_2.0.0             </span></span>
+<span><span class="co">#&gt;  [29] blob_1.3.0                  rhdf5filters_1.23.3        </span></span>
+<span><span class="co">#&gt;  [31] DelayedArray_0.37.0         Rhdf5lib_1.33.2            </span></span>
+<span><span class="co">#&gt;  [33] BiocParallel_1.45.0         parallel_4.6.0             </span></span>
+<span><span class="co">#&gt;  [35] R6_2.6.1                    bslib_0.10.0               </span></span>
+<span><span class="co">#&gt;  [37] stringi_1.8.7               RColorBrewer_1.1-3         </span></span>
+<span><span class="co">#&gt;  [39] reticulate_1.45.0           GenomicRanges_1.63.1       </span></span>
+<span><span class="co">#&gt;  [41] jquerylib_0.1.4             Rcpp_1.1.1                 </span></span>
+<span><span class="co">#&gt;  [43] Seqinfo_1.1.0               bookdown_0.46              </span></span>
+<span><span class="co">#&gt;  [45] SummarizedExperiment_1.41.1 knitr_1.51                 </span></span>
+<span><span class="co">#&gt;  [47] IRanges_2.45.0              Matrix_1.7-4               </span></span>
+<span><span class="co">#&gt;  [49] tidyselect_1.2.1            abind_1.4-8                </span></span>
+<span><span class="co">#&gt;  [51] yaml_2.3.12                 codetools_0.2-20           </span></span>
+<span><span class="co">#&gt;  [53] curl_7.0.0                  lattice_0.22-9             </span></span>
+<span><span class="co">#&gt;  [55] tibble_3.3.1                withr_3.0.2                </span></span>
+<span><span class="co">#&gt;  [57] KEGGREST_1.51.1             InteractionSet_1.39.0      </span></span>
+<span><span class="co">#&gt;  [59] Biobase_2.71.0              basilisk.utils_1.23.1      </span></span>
+<span><span class="co">#&gt;  [61] S7_0.2.1                    evaluate_1.0.5             </span></span>
+<span><span class="co">#&gt;  [63] desc_1.4.3                  Biostrings_2.79.5          </span></span>
+<span><span class="co">#&gt;  [65] pillar_1.11.1               BiocManager_1.30.27        </span></span>
+<span><span class="co">#&gt;  [67] filelock_1.0.3              MatrixGenerics_1.23.0      </span></span>
+<span><span class="co">#&gt;  [69] stats4_4.6.0                plotly_4.12.0              </span></span>
+<span><span class="co">#&gt;  [71] vroom_1.7.0                 BiocVersion_3.23.1         </span></span>
+<span><span class="co">#&gt;  [73] S4Vectors_0.49.0            ggplot2_4.0.2              </span></span>
+<span><span class="co">#&gt;  [75] scales_1.4.0                glue_1.8.0                 </span></span>
+<span><span class="co">#&gt;  [77] lazyeval_0.2.2              tools_4.6.0                </span></span>
+<span><span class="co">#&gt;  [79] BiocIO_1.21.0               data.table_1.18.2.1        </span></span>
+<span><span class="co">#&gt;  [81] fs_1.6.7                    rhdf5_2.55.15              </span></span>
+<span><span class="co">#&gt;  [83] grid_4.6.0                  tidyr_1.3.2                </span></span>
+<span><span class="co">#&gt;  [85] crosstalk_1.2.2             AnnotationDbi_1.73.0       </span></span>
+<span><span class="co">#&gt;  [87] basilisk_1.23.0             cli_3.6.5                  </span></span>
+<span><span class="co">#&gt;  [89] rappdirs_0.3.4              textshaping_1.0.5          </span></span>
+<span><span class="co">#&gt;  [91] S4Arrays_1.11.1             viridisLite_0.4.3          </span></span>
+<span><span class="co">#&gt;  [93] dplyr_1.2.0                 gtable_0.3.6               </span></span>
+<span><span class="co">#&gt;  [95] sass_0.4.10                 digest_0.6.39              </span></span>
+<span><span class="co">#&gt;  [97] SparseArray_1.11.11         htmlwidgets_1.6.4          </span></span>
+<span><span class="co">#&gt;  [99] farver_2.1.2                memoise_2.0.1              </span></span>
+<span><span class="co">#&gt; [101] htmltools_0.5.9             pkgdown_2.2.0              </span></span>
+<span><span class="co">#&gt; [103] lifecycle_1.0.5             httr_1.4.8                 </span></span>
 <span><span class="co">#&gt; [105] bit64_4.6.0-1</span></span></code></pre></div>
 </div>
   </div>
@@ -463,7 +454,7 @@ files.</p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
       </footer>
