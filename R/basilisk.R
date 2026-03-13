@@ -1,7 +1,7 @@
 HiCool_args <- list(
     pkg="HiCool",
     name="env1",
-    version="0.1.0",
+    version="0.2.0",
     packages=c(
         "python==3.12.11",
         "numpy==1.26.4",
