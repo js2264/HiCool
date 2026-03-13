@@ -9,7 +9,7 @@ Serizay J, Matthey-Doret C, Bignaud A, Baudry L, Koszul R (2024). “Orchestrati
 
 [![DOI](https://img.shields.io/badge/Nat._Commun-10.1038/s41467--024--44761--x-blue)](https://www.nature.com/articles/s41467-024-44761-x)
 
---- 
+---
 
 The `HiCool` R/Bioconductor package provides an **end-to-end interface** to 
 process and normalize Hi-C paired-end fastq reads into `.(m)cool` files.
