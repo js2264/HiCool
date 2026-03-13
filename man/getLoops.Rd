@@ -52,7 +52,9 @@ Find loops using chromosight
 }
 \examples{
 contacts_yeast <- contacts_yeast()
-contacts_yeast <- getLoops(contacts_yeast)
-metadata(contacts_yeast)$chromosight_args
-topologicalFeatures(contacts_yeast, 'loops')
+\dontrun{
+  contacts_yeast <- getLoops(contacts_yeast)
+  metadata(contacts_yeast)$chromosight_args
+  topologicalFeatures(contacts_yeast, 'loops')
+}
 }
