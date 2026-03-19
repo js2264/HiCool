@@ -103,6 +103,7 @@ HiCool <- function(
     ###############################################
     ## ------------- Correct paths ------------- ##
     ###############################################
+    message("HiCool :: Parsing HiCool arguments and checking files.")
     r1 <- normalizePath(r1)
     r2 <- normalizePath(r2)
     output <- normalizePath(output, mustWork = FALSE)
@@ -112,7 +113,9 @@ HiCool <- function(
     ## -------- Get path to python bins -------- ##
     ###############################################
     env_dir <- do.call(basilisk.utils::createEnvironment, HiCool_args)
+    Sys.setenv(KMP_DUPLICATE_LIB_OK = "TRUE")
     reticulate::use_condaenv(env_dir, required = TRUE)
+    message("HiCool :: Processing .fastq files to .mcool format. This might take a while.")
     hs <- reticulate::import("hicstuff")
 
     ##############################################

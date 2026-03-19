@@ -54,6 +54,7 @@ getLoops <- function(
     ## -------- Get path to python bins -------- ##
     ###############################################
     env_dir <- do.call(basilisk.utils::createEnvironment, HiCool_args)
+    Sys.setenv(KMP_DUPLICATE_LIB_OK = "TRUE")
     reticulate::use_condaenv(env_dir, required = TRUE)
     cs <- reticulate::import("chromosight")
     if (is.null(resolution)) resolution <- resolution(x)
