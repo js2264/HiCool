@@ -27,7 +27,7 @@ for efficiently storing HiC-based data. The `.(m)cool`  file format was
 developed by Abdennur and Mirny and 
 [published in 2019](https://doi.org/10.1093/bioinformatics/btz540).
 4. Internally, all these external dependencies are automatically installed and 
-managed in R by a `basilisk` environment.
+managed in R by a `basilisk.utils` conda environment.
 
 ![](https://raw.githubusercontent.com/js2264/HiCool/devel/man/figures/pipeline.png)
 
@@ -116,16 +116,19 @@ if (!require("BiocManager", quietly = TRUE)) install.packages("BiocManager")
 BiocManager::install("HiCool")
 ```
 
-The first time a `HiCool()` function is executed, a `basilisk` environment 
-will be automatically set up. In this environment, few dependencies will be 
-installed: 
+The first time a `HiCool()` function is executed, a `conda` environment 
+will be automatically set up (with `basilisk.utils`). In this environment, 
+few dependencies will be installed: 
 
-- python (pinned 3.9.1)
-- numpy (pinned 1.23.4)
-- bowtie2 (pinned 2.4.5)
-- samtools (pinned 1.7)
-- **hicstuff** (pinned 3.1.5)
-- **cooler** (pinned 0.8.11)
+- python (pinned 3.12.11)
+- numpy (pinned 1.26.4)
+- pandas (pinned 2.3.3)
+- bowtie2 (pinned 2.5.4)
+- samtools (pinned 1.22.1)
+- pairtools (pinned 1.1.3)
+- **hicstuff** (pinned 3.2.5)
+- **chromosight** (pinned 1.6.3)
+- **cooler** (pinned 0.10.4)
 
 ## HiCExperiment ecosystem
 

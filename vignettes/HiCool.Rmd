@@ -38,7 +38,7 @@ for efficiently storing HiC-based data. The `.(m)cool`  file format was
 developed by Abdennur and Mirny and 
 [published in 2019](https://doi.org/10.1093/bioinformatics/btz540).
 4. Internally, all these external dependencies are automatically installed and 
-managed in R by a `basilisk` environment.
+managed in R by a `basilisk.utils` conda environment.
 
 The main processing function offered in this package is `HiCool()`.
 To process `.fastq` reads into `.pairs` & `.mcool` files, one needs to provide: 
@@ -142,17 +142,19 @@ a `conda` environment containing:
 
 - `python 3.12.11`
 - `numpy 1.26.4`
+- `pandas 2.3.3`
 - `bowtie2 2.5.4`
 - `chromosight 1.6.3`
-- `cooler 0.10.3`
-- `hicstuff 3.2.4`
+- `cooler 0.10.4`
+- `hicstuff 3.2.5`
 - `pairtools 1.1.3`
 - `samtools 1.22.1`
 
 The first time `HiCool()` is executed, a fresh `conda` environment will 
 be created and required dependencies automatically installed. This ensures 
 compatibility between the different system dependencies needed to process 
-Hi-C fastq files. 
+Hi-C fastq files. The tools of this environment run in a separate process, 
+so their libraries never conflict with those already loaded in the R session.
 
 # Session info
 

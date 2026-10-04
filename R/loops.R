@@ -54,9 +54,6 @@ getLoops <- function(
     ## -------- Get path to python bins -------- ##
     ###############################################
     env_dir <- do.call(basilisk.utils::createEnvironment, HiCool_args)
-    Sys.setenv(KMP_DUPLICATE_LIB_OK = "TRUE")
-    reticulate::use_condaenv(env_dir, required = TRUE)
-    cs <- reticulate::import("chromosight")
     if (is.null(resolution)) resolution <- resolution(x)
     path <- paste0(fileName(x), '::/resolutions/', as.integer(resolution))
     dir.create(dirname(output_prefix), showWarnings = FALSE)
@@ -76,7 +73,7 @@ getLoops <- function(
         "--no-plotting" = TRUE, 
         "--smooth-trend" = FALSE,
         # settable parameters
-        "--norm" = 'auto', 
+        "--norm" = norm,
         "<contact_map>" = path, 
         "--max-dist" = max.dist, 
         "--min-dist" = min.dist, 
@@ -87,14 +84,17 @@ getLoops <- function(
         "--subsample" = nreads, 
         "--threads" = ncores 
     )
-    loops <- .getLoops(cs, args)
+    loops <- .getLoops(env_dir, args)
     topologicalFeatures(x, 'loops') <- loops
     metadata(x)[['chromosight_args']] <- args
     return(x)
 }
 
-.getLoops <- function(cs, chromosight_args) {
-    cs$cli$chromosight$cmd_detect(chromosight_args)
+.getLoops <- function(env_dir, chromosight_args) {
+    .runInEnv(
+        env_dir, "chromosight", c("detect", .docoptArgs(chromosight_args)),
+        log = tempfile(fileext = '.log')
+    )
     df <- vroom::vroom(paste0(chromosight_args[['<prefix>']], '.tsv'), show_col_types = FALSE)
     loops <- InteractionSet::GInteractions(
         anchor1 = GenomicRanges::GRanges(

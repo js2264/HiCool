@@ -82,7 +82,7 @@ A \code{CoolFile} object with prefilled \code{pairsFile} and \code{metadata} slo
 \code{HiCool::HiCool()} automatically processes paired-end HiC sequencing files
 by performing the following steps:
 \enumerate{
-\item Automatically setting up an appropriate conda environment using basilisk;
+\item Automatically setting up an appropriate conda environment using basilisk.utils;
 \item Mapping the reads to the provided genome reference using \code{hicstuff} and filtering of irrelevant pairs;
 \item Filtering the resulting pairs file to remove unwanted chromosomes (e.g. chrM);
 \item Binning the filtered pairs into a cool file at a chosen resolution;

@@ -14,7 +14,6 @@
 #' @importFrom plotly layout
 #' @importFrom sessioninfo os_name
 #' @importFrom sessioninfo package_info
-#' @importFrom sessioninfo python_info
 #' @importFrom BiocIO resource
 #' @importFrom S4Vectors metadata
 #' @return String to the generated HTML report file
