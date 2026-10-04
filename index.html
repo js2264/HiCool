@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">HiCool</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.11.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.13.2</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
 <li>Pairs filering is done using the approach described in <a href="https://doi.org/10.1186/1471-2164-13-436" class="external-link">Cournac et al., 2012</a> and implemented in <code>hicstuff</code>.</li>
 <li>
 <code>Cooler</code> (<a href="https://github.com/open2c/cooler" class="external-link">https://github.com/open2c/cooler</a>) library is used to parse pairs into a multi-resolution, balanced <code>.mcool</code> file. <code>.(m)cool</code> is a compact, indexed HDF5 file format specifically tailored for efficiently storing HiC-based data. The <code>.(m)cool</code> file format was developed by Abdennur and Mirny and <a href="https://doi.org/10.1093/bioinformatics/btz540" class="external-link">published in 2019</a>.</li>
-<li>Internally, all these external dependencies are automatically installed and managed in R by a <code>basilisk</code> environment.</li>
+<li>Internally, all these external dependencies are automatically installed and managed in R by a <code>basilisk.utils</code> conda environment.</li>
 </ol>
 <p><img src="https://raw.githubusercontent.com/js2264/HiCool/devel/man/figures/pipeline.png"></p>
 <div class="section level2">
@@ -151,16 +151,20 @@
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://bioconductor.github.io/BiocManager/" class="external-link">"BiocManager"</a></span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span></span>
 <span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"HiCool"</span><span class="op">)</span></span></code></pre></div>
-<p>The first time a <code><a href="reference/HiCool.html">HiCool()</a></code> function is executed, a <code>basilisk</code> environment will be automatically set up. In this environment, few dependencies will be installed:</p>
+<p>The first time a <code><a href="reference/HiCool.html">HiCool()</a></code> function is executed, a <code>conda</code> environment will be automatically set up (with <code>basilisk.utils</code>). In this environment, few dependencies will be installed:</p>
 <ul>
-<li>python (pinned 3.9.1)</li>
-<li>numpy (pinned 1.23.4)</li>
-<li>bowtie2 (pinned 2.4.5)</li>
-<li>samtools (pinned 1.7)</li>
+<li>python (pinned 3.12.11)</li>
+<li>numpy (pinned 1.26.4)</li>
+<li>pandas (pinned 2.3.3)</li>
+<li>bowtie2 (pinned 2.5.4)</li>
+<li>samtools (pinned 1.22.1)</li>
+<li>pairtools (pinned 1.1.3)</li>
 <li>
-<strong>hicstuff</strong> (pinned 3.1.5)</li>
+<strong>hicstuff</strong> (pinned 3.2.5)</li>
 <li>
-<strong>cooler</strong> (pinned 0.8.11)</li>
+<strong>chromosight</strong> (pinned 1.6.3)</li>
+<li>
+<strong>cooler</strong> (pinned 0.10.4)</li>
 </ul>
 </div>
 <div class="section level2">
@@ -237,7 +241,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
       </footer>
