@@ -9,7 +9,7 @@
 #' `HiCool::HiCool()` automatically processes paired-end HiC sequencing files 
 #' by performing the following steps: 
 #' 
-#' 1. Automatically setting up an appropriate conda environment using basilisk;  
+#' 1. Automatically setting up an appropriate conda environment using basilisk.utils;  
 #' 2. Mapping the reads to the provided genome reference using `hicstuff` and filtering of irrelevant pairs;  
 #' 4. Filtering the resulting pairs file to remove unwanted chromosomes (e.g. chrM);  
 #' 3. Binning the filtered pairs into a cool file at a chosen resolution;  
@@ -63,12 +63,8 @@
 #' 
 #' @importClassesFrom HiCExperiment CoolFile
 #' @importFrom HiCExperiment CoolFile
-#' @importFrom stringr str_replace_all
 #' @importFrom utils read.delim
 #' @importFrom basilisk.utils createEnvironment
-#' @importFrom reticulate use_condaenv
-#' @importFrom reticulate import 
-#' @importFrom reticulate py_capture_output
 #' @export
 #' 
 #' @examples 
@@ -113,16 +109,13 @@ HiCool <- function(
     ## -------- Get path to python bins -------- ##
     ###############################################
     env_dir <- do.call(basilisk.utils::createEnvironment, HiCool_args)
-    Sys.setenv(KMP_DUPLICATE_LIB_OK = "TRUE")
-    reticulate::use_condaenv(env_dir, required = TRUE)
     message("HiCool :: Processing .fastq files to .mcool format. This might take a while.")
-    hs <- reticulate::import("hicstuff")
 
     ##############################################
     ## --------- Process reads ---------------- ##
     ###############################################
     hash <- .processFastq(
-        hs = hs,
+        env_dir = env_dir,
         r1 = r1, 
         r2 = r2, 
         genome = genome, 
@@ -153,7 +146,7 @@ HiCool <- function(
 }
 
 .processFastq <- function(
-    hs,
+    env_dir,
     r1, 
     r2, 
     genome, 
@@ -208,24 +201,27 @@ HiCool <- function(
     ###############################################
 
     message("HiCool :: Mapping fastq files...")
-    hs$pipeline$full_pipeline(
-        input1 = r1, 
-        input2 = r2, 
-        genome = genome, 
-        enzyme = restriction, 
-        filter_events = TRUE, 
-        force = TRUE, 
-        mapping = ifelse(iterative, "iterative", "normal"),
-        binning = as.character(binning),
-        exclude = gsub("\\|", ",", exclude_chr),
-        no_cleanup = TRUE,
-        out_dir = tmp_folder, 
-        pcr_duplicates = TRUE, 
-        plot = TRUE, 
-        prefix = prefix, 
-        threads = threads,
-        distance_law = TRUE
-    ) |> reticulate::py_capture_output() |> write(sinked_log)
+    exclude <- if (length(exclude_chr) && nzchar(exclude_chr))
+        c("--exclude", gsub("\\|", ",", exclude_chr))
+    .runInEnv(env_dir, "hicstuff", c(
+        "pipeline",
+        "--genome", genome,
+        "--enzyme", restriction,
+        "--filter",
+        "--force",
+        "--mapping", ifelse(iterative, "iterative", "normal"),
+        "--binning", as.integer(binning),
+        exclude,
+        "--no-cleanup",
+        "--outdir", tmp_folder,
+        "--duplicates",
+        "--plot",
+        "--prefix", prefix,
+        "--threads", as.integer(threads),
+        "--distance-law",
+        r1,
+        r2
+    ), log = sinked_log)
     log_file <- list.files(tmp_folder, pattern = paste0(hash, '.hicstuff_'), full.names = TRUE)
     writeLines(c(
         paste0("HiCool working directory ::: ", getwd()),

@@ -200,7 +200,7 @@ grep(':: INFO :: variance is', l, invert = TRUE, value = TRUE) |>
 
 ```{r}
 env_dir <- do.call(basilisk.utils::createEnvironment, HiCool_args)
-reticulate::use_condaenv(env_dir, required = TRUE)
+python <- file.path(env_dir, 'bin', 'python')
 message(
     "OS:\t\t\t\t", sessioninfo::os_name(), '\n',
     "system:\t\t\t", version$system, '\n',
@@ -208,9 +208,9 @@ message(
     "R:\t\t\t\t", paste(
         version$major, version$minor, sep = '.'
     ), "(", R.home(), ")", '\n',
-    "Python:\t\t\t", reticulate::py_version(), "(", reticulate::py_exe(), ")", '\n',
+    "Python:\t\t\t", sub('^Python ', '', system2(python, '--version', stdout = TRUE, stderr = TRUE)), "(", python, ")", '\n',
     "Bioconductor:\t", BiocManager::version(), '\n',
-    "basilisk:\t\t", packageVersion('basilisk'), '\n',
+    "basilisk.utils:\t", packageVersion('basilisk.utils'), '\n',
     "HiCExperiment:\t", packageVersion('HiCExperiment'), '\n',
     "HiCool:\t\t\t", packageVersion('HiCool'), '\n'
 )
@@ -225,6 +225,7 @@ message(
     "cooler: \t", gsub('.*==', '', grep('cooler', HiCool:::HiCool_args$packages, value = TRUE)), "\n",
     "pairtools: \t", gsub('.*==', '', grep('pairtools', HiCool:::HiCool_args$packages, value = TRUE)), "\n",
     "numpy: \t", gsub('.*==', '', grep('numpy', HiCool:::HiCool_args$packages, value = TRUE)), "\n",
+    "pandas: \t", gsub('.*==', '', grep('pandas', HiCool:::HiCool_args$packages, value = TRUE)), "\n",
     "samtools: \t", gsub('.*==', '', grep('samtools', HiCool:::HiCool_args$packages, value = TRUE)), "\n",
     "bowtie2: \t", gsub('.*==', '', grep('bowtie2', HiCool:::HiCool_args$packages, value = TRUE)), "\n"
 )
@@ -239,11 +240,16 @@ sessioninfo::package_info()
 > Python environment
 
 ```{r}
-sessioninfo::python_info()
+message("conda environment:\t", env_dir)
 ```
 
 > Python packages
 
 ```{r}
-basilisk::listPackages(dirname(dirname(reticulate::py_exe())))
+pkgs <- sub('\\.json$', '', list.files(file.path(env_dir, 'conda-meta'), pattern = '\\.json$'))
+data.frame(
+    package = sub('-[^-]+-[^-]+$', '', pkgs),
+    version = sub('^.*-([^-]+)-[^-]+$', '\\1', pkgs),
+    build = sub('^.*-', '', pkgs)
+)
 ```

@@ -68,57 +68,30 @@ getHicStats <- function(log) {
     lines <- readLines(log)
     filtered <- any(grepl('INFO :: Filtering with thresholds', lines))
 
-    ## -- Parse log file
+    ## -- Parse log file. Numbers are formatted differently in logs from
+    ## -- hicstuff >= 3.2.5, e.g. `(613/53553 pairs)` instead of
+    ## -- `(613 / 53553 pairs) `: both are supported.
+    mapped <- .logNumbers(lines, "mapped with Q >= [0-9]+ \\(([0-9]+) ?/ ?([0-9]+)\\)")
+    pcr <- .logNumbers(lines, "PCR duplicates have been filtered out \\(([0-9]+) ?/ ?([0-9]+) pairs\\)")
+    nFragments <- mapped[2] / 2
+    nDups <- pcr[1]
     if (!filtered) {
-        nFragments <- grep("INFO :: .* mapped with Q", lines, value = TRUE) |>
-            stringr::str_replace_all(".*/|\\)", "") |>
-            as.numeric() |>
-            (`/`)(2)
         nDangling <- 0
         nSelf <- 0
         nDumped <- 0
-        nPairs <- grep("INFO :: .* PCR duplicates have", lines, value = TRUE) |>
-            stringr::str_replace_all(".* / | pairs\\) $", "") |>
-            as.numeric()
-        nFiltered <- nPairs
-        nDups <- grep("INFO :: .* PCR duplicates have", lines, value = TRUE) |>
-            stringr::str_replace_all(".*out \\(| \\/ .*", "") |>
-            as.numeric()
-        nUnique <- nFiltered - nDups
+        nFiltered <- pcr[2]
         threshold_uncut <- NA
         threshold_self <- NA
     }
     else {
-        nFragments <- grep("INFO :: .* mapped with Q", lines, value = TRUE) |>
-            stringr::str_replace_all(".*/|\\)", "") |>
-            as.numeric() |>
-            (`/`)(2)
-        nDangling <- grep("INFO :: .* pairs discarded", lines, value = TRUE) |>
-            stringr::str_replace_all(".* Uncuts: |, Weirds.*", "") |>
-            as.numeric() # "Uncut"
-        nSelf <- grep("INFO :: .* pairs discarded", lines, value = TRUE) |>
-            stringr::str_replace_all(".* Loops: |, Uncuts.*", "") |>
-            as.numeric() # "loop"
-        nDumped <- grep("INFO :: .* pairs discarded", lines, value = TRUE) |>
-            stringr::str_replace_all(".* Weirds:", "") |>
-            as.numeric() # "Weird"
-        nFiltered <- grep("INFO :: .* pairs kept", lines, value = TRUE) |>
-            stringr::str_replace_all(".*INFO ::| pairs.*", "") |>
-            as.numeric()
-        nPairs <- nFiltered + nDangling + nSelf + nDumped
-        nDups <- grep("INFO :: .* PCR duplicates have", lines, value = TRUE) |>
-            stringr::str_replace_all(".*out \\(| \\/ .*", "") |>
-            as.numeric()
-        nUnique <- nFiltered - grep("INFO :: .* PCR duplicates have", lines, value = TRUE) |>
-            stringr::str_replace_all(".*out \\(| \\/ .*", "") |>
-            as.numeric()
-        threshold_uncut <- grep("INFO :: Filtering with thresholds", lines, value = TRUE) |>
-            stringr::str_replace_all(".*thresholds: | loops=.*", "") |>
-            stringr::str_replace(".*=", "") |>
-            as.numeric()
-        threshold_self <- grep("INFO :: Filtering with thresholds", lines, value = TRUE) |>
-            stringr::str_replace_all(".*=", "") |>
-            as.numeric()
+        discarded <- .logNumbers(lines, "pairs discarded: Loops: ([0-9]+), Uncuts: ([0-9]+), Weirds: ([0-9]+)")
+        nSelf <- discarded[1] # "loop"
+        nDangling <- discarded[2] # "Uncut"
+        nDumped <- discarded[3] # "Weird"
+        nFiltered <- .logNumbers(lines, "INFO :: ([0-9]+) pairs kept")[1]
+        thresholds <- .logNumbers(lines, "Filtering with thresholds: uncuts=([0-9]+) loops=([0-9]+)")
+        threshold_uncut <- thresholds[1]
+        threshold_self <- thresholds[2]
     }
 
     stats[["nFragments"]] <- nFragments
@@ -133,6 +106,61 @@ getHicStats <- function(log) {
     stats[["threshold_self"]] <- threshold_self
 
     return(stats)
+}
+
+## Numbers captured by the groups of `pattern` in the first matching log line
+.logNumbers <- function(lines, pattern) {
+    hit <- grep(pattern, lines, value = TRUE)
+    if (!length(hit)) return(NA_real_)
+    as.numeric(regmatches(hit[1], regexec(pattern, hit[1]))[[1]][-1])
+}
+
+## Run a command-line tool of the HiCool conda environment in a separate
+## process. Its python modules are thus never loaded in the R session, where
+## they can clash with libraries that R has already loaded.
+.runInEnv <- function(env_dir, command, args, log) {
+    bin <- file.path(env_dir, 'bin')
+    vars <- c(
+        PATH = paste(bin, Sys.getenv('PATH'), sep = .Platform$path.sep),
+        PYTHONNOUSERSITE = '1',
+        PYTHONPATH = '',
+        PYTHONHOME = '',
+        MPLBACKEND = 'Agg'
+    )
+    status <- system2(
+        file.path(bin, command), shQuote(as.character(args)),
+        stdout = log, stderr = log,
+        env = paste0(names(vars), '=', shQuote(vars))
+    )
+    if (status != 0) {
+        out <- if (file.exists(log)) utils::tail(readLines(log), 20)
+        stop(
+            "HiCool :: `", command, "` failed (exit status ", status, "). ",
+            "Last lines of its output (", log, "):\n",
+            paste(out, collapse = '\n'),
+            call. = FALSE
+        )
+    }
+    invisible(log)
+}
+
+## Command-line arguments from a list of docopt arguments (as used by
+## chromosight): options set to TRUE are flags, options set to FALSE or NULL
+## are dropped, and positional arguments (`<...>`) come last, in order.
+.docoptArgs <- function(args) {
+    positional <- grepl('^<.*>$', names(args))
+    opts <- args[!positional]
+    opts <- opts[!vapply(opts, function(x) is.null(x) || isFALSE(x), logical(1))]
+    flags <- vapply(opts, isTRUE, logical(1))
+    values <- vapply(opts[!flags], function(x) {
+        if (is.numeric(x)) format(x, scientific = FALSE, trim = TRUE)
+        else as.character(x)
+    }, character(1))
+    c(
+        names(opts)[flags],
+        paste0(names(values), '=', values, recycle0 = TRUE),
+        unlist(args[positional], use.names = FALSE)
+    )
 }
 
 .dhms <- function(t) {

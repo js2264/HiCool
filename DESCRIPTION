@@ -26,13 +26,10 @@ Imports:
     InteractionSet, 
     vroom, 
     basilisk.utils,
-    basilisk,
-    reticulate,
     rmarkdown,
     rmdformats,
     plotly,
     dplyr,
-    stringr,
     sessioninfo, 
     utils
 Suggests:
